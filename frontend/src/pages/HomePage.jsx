@@ -9,7 +9,7 @@ function Homepage() {
 
     return (
         <div>
-            <button className='btn btn-secondary' onClick={() => toast.success("This is a succes toast")}>Click me</button>
+            <button className='btn btn-secondary' onClick={() => toast.success("This is a success toast")}>Click me</button>
 
             <SignedOut>
                 <SignInButton mode='modal'>

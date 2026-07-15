@@ -1,6 +1,5 @@
 # CodeSphere 🌐
 
-![CodeSphere Header](https://via.placeholder.com/1200x400/000000/FFFFFF?text=CodeSphere+-+Real-Time+Technical+Interviews)
 
 CodeSphere is a modern, real-time collaborative platform designed for technical interviews and pair programming. Connect face-to-face via video, code together in a shared editor, and solve curated algorithms across multiple languages with instant code execution.
 

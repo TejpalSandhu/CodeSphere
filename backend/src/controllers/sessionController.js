@@ -46,6 +46,8 @@ export async function getActiveSessions(_, res) {
     try {
         const sessions = await Session.find({ status: "active" })
             .populate("host", "name profileImage email clerkID")
+            .populate("participant", "name profileImage email clerkID")
+
             .sort({ createdAt: -1 })
             .limit(20); //It fetches the latest 20 active sessions, sorted(descending order) by newest first, and replaces each session’s host ID with the host’s basic profile info.
 

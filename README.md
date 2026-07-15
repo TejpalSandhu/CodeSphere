@@ -46,7 +46,7 @@ npm install
 Create a `.env` file in the `backend` directory with the following keys:
 ```env
 PORT=5000
-MONGODB_URI=your_mongodb_connection_string
+DB_URL=your_mongodb_connection_string
 CLERK_SECRET_KEY=your_clerk_secret_key
 STREAM_API_KEY=your_stream_api_key
 STREAM_API_SECRET=your_stream_secret_key

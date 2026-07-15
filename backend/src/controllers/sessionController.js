@@ -6,14 +6,14 @@ export async function createSession(req, res) {
     try {
         const { problem, difficulty } = req.body
         const userId = req.user._id
-        const clerkId = req.user.clerkID
+        const clerkID = req.user.clerkID
 
         if (!problem || !difficulty) {
             return res.status(400).json({ message: "Problem and Difficulty are required" })
         }
 
         //generate a unique call id for stream video
-        const callId = `session_${Date.now()}_${Math.random().toString(36).substrinng(7)}`
+        const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`
 
         //create the session in the database
         const session = await Session.create({ problem, difficulty, host: userId, callId })
@@ -21,20 +21,20 @@ export async function createSession(req, res) {
         //create stream video call
         await streamClient.video.call("default", callId).getOrCreate({
             data: {
-                created_by_id: clerkId,
+                created_by_id: clerkID,
                 custom: { problem, difficulty, sessionId: session._id.toString() },
             },
         })
 
         //chat messaging
 
-        chatClient.channel("messaging", callId, {
+        const channel = chatClient.channel("messaging", callId, {
             name: `${problem} Session`,
             created_by_id: clerkID,
-            members: [clerkID]
-        })
+            members: [clerkID],
+        });
 
-        await channel.create()
+        await channel.create();
         res.status(201).json({ session })
     } catch (error) {
         console.log("Error in createSession controller:", error.message)

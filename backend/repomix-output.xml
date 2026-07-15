@@ -1,0 +1,651 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+package.json
+src/controllers/chatController.js
+src/controllers/sessionController.js
+src/lib/db.js
+src/lib/env.js
+src/lib/inngest.js
+src/lib/stream.js
+src/middleware/protectRoute.js
+src/models/Session.js
+src/models/User.js
+src/routes/chatRoutes.js
+src/routes/sessionRoutes.js
+src/server.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="package.json">
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clerk/express": "^1.7.41",
+    "@stream-io/node-sdk": "^0.7.12",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "inngest": "^4.12.1",
+    "mongoose": "^8.19.1",
+    "stream-chat": "^9.24.0",
+    "talent-iq": "file:.."
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+</file>
+
+<file path="src/controllers/chatController.js">
+import { chatClient } from "../lib/stream.js";
+
+export async function getStreamToken(req, res) {
+    try {
+
+        //use clerkID for stream (not mongodb _id)=> it should match the id we have in the stream
+        const token = chatClient.createToken(req.user.clerkID)
+
+        res.status(200).json({
+            token,
+            userId: req.user.clerkID,
+            userName: req.user.name,
+            userImage: req.user.image,
+        })
+    } catch (error) {
+        console.log("Error in getStreamToken controller", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+
+    }
+}
+</file>
+
+<file path="src/controllers/sessionController.js">
+import { MessageSearchSource } from "stream-chat"
+import { chatClient, streamClient } from "../lib/stream.js"
+import Session from "../models/Session.js"
+
+export async function createSession(req, res) {
+    try {
+        const { problem, difficulty } = req.body
+        const userId = req.user._id
+        const clerkID = req.user.clerkID
+
+        if (!problem || !difficulty) {
+            return res.status(400).json({ message: "Problem and Difficulty are required" })
+        }
+
+        //generate a unique call id for stream video
+        const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`
+
+        //create the session in the database
+        const session = await Session.create({ problem, difficulty, host: userId, callId })
+
+        //create stream video call
+        await streamClient.video.call("default", callId).getOrCreate({
+            data: {
+                created_by_id: clerkID,
+                custom: { problem, difficulty, sessionId: session._id.toString() },
+            },
+        })
+
+        //chat messaging
+
+        const channel = chatClient.channel("messaging", callId, {
+            name: `${problem} Session`,
+            created_by_id: clerkID,
+            members: [clerkID],
+        });
+
+        await channel.create();
+        res.status(201).json({ session })
+    } catch (error) {
+        console.log("Error in createSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getActiveSessions(_, res) {
+    try {
+        const sessions = await Session.find({ status: "active" })
+            .populate("host", "name profileImage email clerkID")
+            .sort({ createdAt: -1 })
+            .limit(20); //It fetches the latest 20 active sessions, sorted(descending order) by newest first, and replaces each session’s host ID with the host’s basic profile info.
+
+        res.status(200).json({ sessions })
+
+    } catch (error) {
+        console.log("Error in getActiveSessions controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getMyRecentSessions(req, res) {
+    try {
+        const userId = req.user._id
+        //get sessions where user is either host or participant
+        const sessions = await Session.find({
+            status: "completed",
+            $or: [{ host: userId }, { participant: userId }]
+        })
+            .sort({ createdAt: -1 })
+            .limit(20)
+
+        res.status(200).json({ sessions })
+
+    } catch (error) {
+        console.log("Error in getMyRecentSessions controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getSessionById(req, res) {
+    try {
+        const { id } = req.params //destructure the value to get id
+
+        const session = await Session.findById(id)
+            .populate("host", "name email profileImage clerkID")
+            .populate("participant", "name email profileImage clerkID")
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        res.status(200).json({ session })
+    } catch (error) {
+        console.log("Error in getSessionById controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function joinSession(req, res) {
+    try {
+        const { id } = req.params
+        const userId = req.user._id
+        const clerkID = req.user.clerkID
+
+        const session = await Session.findById(id)
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        if (session.status !== "active") return res.status(400).json({ message: "Cannot join a completed session" })
+
+        if (session.host.toString() === userId.toString())
+            return res.status(400).json({ message: "Host cannot join their own session as participant" })
+
+        //check if session is already full - has a participant
+        if (session.participant) return res.status(409).json({ message: "Session is full" })
+
+        session.participant = userId
+        await session.save()
+
+        const channel = chatClient.channel("messaging", session.callId)
+        await channel.addMembers([clerkID])
+
+        res.status(200).json({ session })
+
+    } catch (error) {
+        console.log("Error in joinSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+//use express-async-handler if code gets bigger instead of try catch everytime
+export async function endSession(req, res) {
+    try {
+        const { id } = req.params
+        const userId = req.user._id
+        const session = await Session.findById(id)
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        //check if user is the host
+        if (session.host.toString() !== userId.toString()) {
+            res.status(403).json({ message: "Only the host can end the Session" })
+        }
+
+        //check if session is already completed
+        if (session.status === "completed") {
+            return res.status(400).json({ message: "Session is already completed" })
+        }
+
+        // delete stream video call
+        const call = streamClient.video.call("default", session.callId)
+        await call.delete({ hard: true })
+
+        // delete stream chat channel
+        const channel = chatClient.channel("messaging", session.callId)
+        await channel.delete()
+
+        session.status = "completed"
+        await session.save()
+
+        res.status(200).json({ session, message: "Session ended successfully" })
+
+    } catch (error) {
+        console.log("Error in endSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+</file>
+
+<file path="src/lib/db.js">
+import mongoose from "mongoose";
+
+import { ENV } from "./env.js";
+
+export const connectDB = async () => {
+    try {
+        if (!ENV.DB_URL) {
+            throw new Error("DB_URL is not defined in environment variables");
+        }
+        const conn = await mongoose.connect(ENV.DB_URL);
+        console.log("✅ Connected to MongoDB:", conn.connection.host);
+    } catch (error) {
+        console.error("❌ Error connecting to MongoDB", error);
+        process.exit(1); // 0 means success, 1 means failure
+    }
+};
+</file>
+
+<file path="src/lib/env.js">
+import dotenv from "dotenv"
+dotenv.config({ quiet: true });
+export const ENV = {
+    PORT: process.env.PORT,
+    DB_URL: process.env.DB_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    CLIENT_URL: process.env.CLIENT_URL,
+    INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+    INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
+    STREAM_API_KEY: process.env.STREAM_API_KEY,
+    STREAM_API_SECRET: process.env.STREAM_API_SECRET,
+
+};
+</file>
+
+<file path="src/lib/inngest.js">
+import { Inngest } from "inngest";
+import { connectDB } from "./db.js";
+import User from "../models/User.js";
+import { deleteStreamUser, upsertStreamUser } from "./stream.js";
+
+export const inngest = new Inngest({
+    id: "talent-iq",
+    eventKey: process.env.INNGEST_EVENT_KEY,
+});
+
+// const syncUser = inngest.createFunction(
+//     {
+//         id: "sync-user",
+//         triggers: [{ event: "clerk/user.created" }],
+//     },
+//     async ({ event }) => {
+
+//         console.log("========== syncUser triggered ==========");
+//         console.log(event.data);
+
+
+//         await connectDB();
+
+//         const { id, email_addresses, first_name, last_name, image_url } = event.data;
+
+//         const newUser = {
+//             clerkID: id,
+//             email: email_addresses[0]?.email_address,
+//             name: `${first_name || ""} ${last_name || ""}`,
+//             profileImage: image_url,
+//         };
+
+
+//         console.log("Creating user:", newUser);
+
+
+//         await User.create(newUser);
+
+//         console.log("User created successfully");
+
+//         await upsertStreamUser({
+//             id: newUser.clerkID.toString(),
+//             name: newUser.name,
+//             image: newUser.profileImage
+//         })
+
+//         //challenge: send a welcome email here later - once I complete the course
+//     }
+// );
+
+const syncUser = inngest.createFunction(
+    {
+        id: "sync-user",
+        triggers: [{ event: "clerk/user.created" }],
+    },
+    async () => {
+        console.log("SYNC WORKS");
+
+        return {
+            success: true,
+        };
+    }
+);
+
+const deleteUserFromDB = inngest.createFunction(
+    {
+        id: "delete-user-from-db",
+        triggers: [{ event: "clerk/user.deleted" }],
+    },
+    async ({ event }) => {
+        await connectDB();
+
+        const { id } = event.data;
+        await User.deleteOne({ clerkID: id });
+
+        await deleteStreamUser(id.toString())
+
+    }
+);
+
+export const functions = [syncUser, deleteUserFromDB];
+</file>
+
+<file path="src/lib/stream.js">
+import { StreamChat } from "stream-chat";
+import { StreamClient } from "@stream-io/node-sdk"
+import { ENV } from "./env.js"
+
+const apiKey = ENV.STREAM_API_KEY
+const apiSecret = ENV.STREAM_API_SECRET
+
+if (!apiKey || !apiSecret) {
+    console.error("STREAM_API_KEY or STREAM_API_SECRET is missing")
+}
+
+export const chatClient = StreamChat.getInstance(apiKey, apiSecret) //this is for chat features
+
+export const streamClient = new StreamClient(apiKey, apiSecret) // will be used for video calls
+
+export const upsertStreamUser = async (userData) => {
+    try {
+        await chatClient.upsertUser(userData)
+        console.log("Stream user upserted successfully:", userData)
+    } catch (error) {
+        console.error("Error upserting Stream user:", error)
+    }
+}
+
+export const deleteStreamUser = async (userId) => {
+    try {
+        await chatClient.deleteUser(userId)
+        console.log("Stream user deleted successfully", userId)
+    } catch (error) {
+        console.error("Error deleting the Stream user:", error)
+    }
+}
+</file>
+
+<file path="src/middleware/protectRoute.js">
+import { requireAuth } from '@clerk/express'
+import User from "../models/User.js"
+
+export const protectRoute = [
+    requireAuth(), // requireAuth({signInUrl: "/sign-in"}) dont let requireAuth() to take us to home page
+
+    async (req, res, next) => {
+        try {
+            const clerkID = req.auth().userId;
+
+            console.log("Current Clerk ID:", clerkID);
+
+
+            if (!clerkID) return res.status(401).json({ message: "Unauthorized - invalid token" })
+
+            //find user in db by clerk ID
+            const user = await User.findOne({ clerkID })
+
+            console.log("Mongo User:", user);
+
+            if (!user) return res.status(404).json({ message: "User not found" })
+
+            //attach user to req
+            req.user = user;
+
+            next()
+
+        } catch (error) {
+            console.error("Error in protectRoute middleware", error)
+            res.status(500).json({ message: "Internal Server Error" })
+
+
+        }
+    }
+]
+</file>
+
+<file path="src/models/Session.js">
+import mongoose from "mongoose";
+
+const sessionSchema = new mongoose.Schema({
+    problem: {
+        type: String,
+        required: true,
+    },
+    difficulty: {
+        type: String,
+        enum: ["easy", "medium", "hard"],
+        required: true
+    },
+    host: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    participant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    status: {
+        type: String,
+        enum: ["active", "completed"],
+        default: "active"
+    },
+    //stream video call ID
+    callId: {
+        type: String,
+        default: "",
+    },
+}, { timestamps: true }
+)
+
+const Session = mongoose.model("Session", sessionSchema)
+
+export default Session
+</file>
+
+<file path="src/models/User.js">
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        profileImage: {
+            type: String,
+            default: "",
+        },
+        clerkID: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+    },
+    { timestamps: true } // createdAt, updatedAt
+);
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
+</file>
+
+<file path="src/routes/chatRoutes.js">
+import express from "express"
+import { getStreamToken } from "../controllers/chatController.js";
+import { protectRoute } from "../middleware/protectRoute.js";
+
+const router = express.Router()
+
+router.get("/token", protectRoute, getStreamToken)
+
+export default router;
+</file>
+
+<file path="src/routes/sessionRoutes.js">
+import express from "express"
+import { protectRoute } from "../middleware/protectRoute.js"
+import {
+    createSession,
+    getActiveSessions,
+    getMyRecentSessions,
+    getSessionById,
+    joinSession,
+    endSession,
+} from "../controllers/sessionController.js"
+
+const router = express.Router()
+
+router.post("/", protectRoute, createSession)
+router.get("/active", protectRoute, getActiveSessions)
+router.get("/my-recent", protectRoute, getMyRecentSessions)
+
+router.get("/:id", protectRoute, getSessionById) //:id means id is dynamic
+router.post("/:id/join", protectRoute, joinSession)
+router.post("/:id/end", protectRoute, endSession)
+
+export default router
+</file>
+
+<file path="src/server.js">
+import express from "express";
+import path from "path";
+import cors from "cors";
+import { serve } from "inngest/express";
+import { clerkMiddleware } from "@clerk/express";
+
+import { ENV } from "./lib/env.js";
+import { connectDB } from "./lib/db.js";
+import { inngest, functions } from "./lib/inngest.js";
+
+import chatRoutes from "./routes/chatRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+
+const app = express();
+
+const __dirname = path.resolve();
+
+// middleware
+app.use(express.json());
+// credentials:true meaning?? => server allows a browser to include cookies on request
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+
+// app.use("/api/inngest", serve({ client: inngest, functions }));
+
+
+// app.use(clerkMiddleware()); // this adds auth field to request object: req.auth()
+
+app.use(
+    "/api/inngest",
+    (req, res, next) => {
+        console.log("INNGEST ROUTE HIT");
+        next();
+    },
+    serve({ client: inngest, functions })
+);
+
+app.use(clerkMiddleware());
+
+app.use("/api/chat", chatRoutes);
+app.use("/api/sessions", sessionRoutes);
+
+app.get("/health", (req, res) => {
+    res.status(200).json({ msg: "api is up and running" });
+});
+
+// make our app ready for deployment
+if (ENV.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("/{*any}", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    });
+}
+
+const startServer = async () => {
+    try {
+        await connectDB();
+        app.listen(ENV.PORT, () => console.log("Server is running on port:", ENV.PORT));
+    } catch (error) {
+        console.error("💥 Error starting the server", error);
+    }
+};
+
+startServer();
+</file>
+
+</files>

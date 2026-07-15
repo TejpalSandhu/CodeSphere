@@ -1,0 +1,3044 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+backend/package.json
+backend/repomix-output.xml
+backend/src/controllers/chatController.js
+backend/src/controllers/sessionController.js
+backend/src/lib/db.js
+backend/src/lib/env.js
+backend/src/lib/inngest.js
+backend/src/lib/stream.js
+backend/src/middleware/protectRoute.js
+backend/src/models/Session.js
+backend/src/models/User.js
+backend/src/routes/chatRoutes.js
+backend/src/routes/sessionRoutes.js
+backend/src/server.js
+frontend/.gitignore
+frontend/eslint.config.js
+frontend/index.html
+frontend/package.json
+frontend/public/hero.png
+frontend/public/vite.svg
+frontend/README.md
+frontend/src/api/sessions.js
+frontend/src/App.jsx
+frontend/src/components/ActiveSessions.jsx
+frontend/src/components/CreateSessionModal.jsx
+frontend/src/components/Navbar.jsx
+frontend/src/components/RecentSessions.jsx
+frontend/src/components/StatsCards.jsx
+frontend/src/components/WelcomeSection.jsx
+frontend/src/data/problems.js
+frontend/src/hooks/useSessions.js
+frontend/src/index.css
+frontend/src/lib/axios.js
+frontend/src/lib/piston.js
+frontend/src/lib/utils.js
+frontend/src/main.jsx
+frontend/src/pages/DashboardPage.jsx
+frontend/src/pages/HomePage.jsx
+frontend/src/pages/ProblemsPage.jsx
+frontend/vite.config.js
+package.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="backend/repomix-output.xml">
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+package.json
+src/controllers/chatController.js
+src/controllers/sessionController.js
+src/lib/db.js
+src/lib/env.js
+src/lib/inngest.js
+src/lib/stream.js
+src/middleware/protectRoute.js
+src/models/Session.js
+src/models/User.js
+src/routes/chatRoutes.js
+src/routes/sessionRoutes.js
+src/server.js
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="package.json">
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clerk/express": "^1.7.41",
+    "@stream-io/node-sdk": "^0.7.12",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "inngest": "^4.12.1",
+    "mongoose": "^8.19.1",
+    "stream-chat": "^9.24.0",
+    "talent-iq": "file:.."
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+</file>
+
+<file path="src/controllers/chatController.js">
+import { chatClient } from "../lib/stream.js";
+
+export async function getStreamToken(req, res) {
+    try {
+
+        //use clerkID for stream (not mongodb _id)=> it should match the id we have in the stream
+        const token = chatClient.createToken(req.user.clerkID)
+
+        res.status(200).json({
+            token,
+            userId: req.user.clerkID,
+            userName: req.user.name,
+            userImage: req.user.image,
+        })
+    } catch (error) {
+        console.log("Error in getStreamToken controller", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+
+    }
+}
+</file>
+
+<file path="src/controllers/sessionController.js">
+import { MessageSearchSource } from "stream-chat"
+import { chatClient, streamClient } from "../lib/stream.js"
+import Session from "../models/Session.js"
+
+export async function createSession(req, res) {
+    try {
+        const { problem, difficulty } = req.body
+        const userId = req.user._id
+        const clerkID = req.user.clerkID
+
+        if (!problem || !difficulty) {
+            return res.status(400).json({ message: "Problem and Difficulty are required" })
+        }
+
+        //generate a unique call id for stream video
+        const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`
+
+        //create the session in the database
+        const session = await Session.create({ problem, difficulty, host: userId, callId })
+
+        //create stream video call
+        await streamClient.video.call("default", callId).getOrCreate({
+            data: {
+                created_by_id: clerkID,
+                custom: { problem, difficulty, sessionId: session._id.toString() },
+            },
+        })
+
+        //chat messaging
+
+        const channel = chatClient.channel("messaging", callId, {
+            name: `${problem} Session`,
+            created_by_id: clerkID,
+            members: [clerkID],
+        });
+
+        await channel.create();
+        res.status(201).json({ session })
+    } catch (error) {
+        console.log("Error in createSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getActiveSessions(_, res) {
+    try {
+        const sessions = await Session.find({ status: "active" })
+            .populate("host", "name profileImage email clerkID")
+            .sort({ createdAt: -1 })
+            .limit(20); //It fetches the latest 20 active sessions, sorted(descending order) by newest first, and replaces each session’s host ID with the host’s basic profile info.
+
+        res.status(200).json({ sessions })
+
+    } catch (error) {
+        console.log("Error in getActiveSessions controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getMyRecentSessions(req, res) {
+    try {
+        const userId = req.user._id
+        //get sessions where user is either host or participant
+        const sessions = await Session.find({
+            status: "completed",
+            $or: [{ host: userId }, { participant: userId }]
+        })
+            .sort({ createdAt: -1 })
+            .limit(20)
+
+        res.status(200).json({ sessions })
+
+    } catch (error) {
+        console.log("Error in getMyRecentSessions controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getSessionById(req, res) {
+    try {
+        const { id } = req.params //destructure the value to get id
+
+        const session = await Session.findById(id)
+            .populate("host", "name email profileImage clerkID")
+            .populate("participant", "name email profileImage clerkID")
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        res.status(200).json({ session })
+    } catch (error) {
+        console.log("Error in getSessionById controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function joinSession(req, res) {
+    try {
+        const { id } = req.params
+        const userId = req.user._id
+        const clerkID = req.user.clerkID
+
+        const session = await Session.findById(id)
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        if (session.status !== "active") return res.status(400).json({ message: "Cannot join a completed session" })
+
+        if (session.host.toString() === userId.toString())
+            return res.status(400).json({ message: "Host cannot join their own session as participant" })
+
+        //check if session is already full - has a participant
+        if (session.participant) return res.status(409).json({ message: "Session is full" })
+
+        session.participant = userId
+        await session.save()
+
+        const channel = chatClient.channel("messaging", session.callId)
+        await channel.addMembers([clerkID])
+
+        res.status(200).json({ session })
+
+    } catch (error) {
+        console.log("Error in joinSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+//use express-async-handler if code gets bigger instead of try catch everytime
+export async function endSession(req, res) {
+    try {
+        const { id } = req.params
+        const userId = req.user._id
+        const session = await Session.findById(id)
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        //check if user is the host
+        if (session.host.toString() !== userId.toString()) {
+            res.status(403).json({ message: "Only the host can end the Session" })
+        }
+
+        //check if session is already completed
+        if (session.status === "completed") {
+            return res.status(400).json({ message: "Session is already completed" })
+        }
+
+        // delete stream video call
+        const call = streamClient.video.call("default", session.callId)
+        await call.delete({ hard: true })
+
+        // delete stream chat channel
+        const channel = chatClient.channel("messaging", session.callId)
+        await channel.delete()
+
+        session.status = "completed"
+        await session.save()
+
+        res.status(200).json({ session, message: "Session ended successfully" })
+
+    } catch (error) {
+        console.log("Error in endSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+</file>
+
+<file path="src/lib/db.js">
+import mongoose from "mongoose";
+
+import { ENV } from "./env.js";
+
+export const connectDB = async () => {
+    try {
+        if (!ENV.DB_URL) {
+            throw new Error("DB_URL is not defined in environment variables");
+        }
+        const conn = await mongoose.connect(ENV.DB_URL);
+        console.log("✅ Connected to MongoDB:", conn.connection.host);
+    } catch (error) {
+        console.error("❌ Error connecting to MongoDB", error);
+        process.exit(1); // 0 means success, 1 means failure
+    }
+};
+</file>
+
+<file path="src/lib/env.js">
+import dotenv from "dotenv"
+dotenv.config({ quiet: true });
+export const ENV = {
+    PORT: process.env.PORT,
+    DB_URL: process.env.DB_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    CLIENT_URL: process.env.CLIENT_URL,
+    INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+    INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
+    STREAM_API_KEY: process.env.STREAM_API_KEY,
+    STREAM_API_SECRET: process.env.STREAM_API_SECRET,
+
+};
+</file>
+
+<file path="src/lib/inngest.js">
+import { Inngest } from "inngest";
+import { connectDB } from "./db.js";
+import User from "../models/User.js";
+import { deleteStreamUser, upsertStreamUser } from "./stream.js";
+
+export const inngest = new Inngest({
+    id: "talent-iq",
+    eventKey: process.env.INNGEST_EVENT_KEY,
+});
+
+// const syncUser = inngest.createFunction(
+//     {
+//         id: "sync-user",
+//         triggers: [{ event: "clerk/user.created" }],
+//     },
+//     async ({ event }) => {
+
+//         console.log("========== syncUser triggered ==========");
+//         console.log(event.data);
+
+
+//         await connectDB();
+
+//         const { id, email_addresses, first_name, last_name, image_url } = event.data;
+
+//         const newUser = {
+//             clerkID: id,
+//             email: email_addresses[0]?.email_address,
+//             name: `${first_name || ""} ${last_name || ""}`,
+//             profileImage: image_url,
+//         };
+
+
+//         console.log("Creating user:", newUser);
+
+
+//         await User.create(newUser);
+
+//         console.log("User created successfully");
+
+//         await upsertStreamUser({
+//             id: newUser.clerkID.toString(),
+//             name: newUser.name,
+//             image: newUser.profileImage
+//         })
+
+//         //challenge: send a welcome email here later - once I complete the course
+//     }
+// );
+
+const syncUser = inngest.createFunction(
+    {
+        id: "sync-user",
+        triggers: [{ event: "clerk/user.created" }],
+    },
+    async () => {
+        console.log("SYNC WORKS");
+
+        return {
+            success: true,
+        };
+    }
+);
+
+const deleteUserFromDB = inngest.createFunction(
+    {
+        id: "delete-user-from-db",
+        triggers: [{ event: "clerk/user.deleted" }],
+    },
+    async ({ event }) => {
+        await connectDB();
+
+        const { id } = event.data;
+        await User.deleteOne({ clerkID: id });
+
+        await deleteStreamUser(id.toString())
+
+    }
+);
+
+export const functions = [syncUser, deleteUserFromDB];
+</file>
+
+<file path="src/lib/stream.js">
+import { StreamChat } from "stream-chat";
+import { StreamClient } from "@stream-io/node-sdk"
+import { ENV } from "./env.js"
+
+const apiKey = ENV.STREAM_API_KEY
+const apiSecret = ENV.STREAM_API_SECRET
+
+if (!apiKey || !apiSecret) {
+    console.error("STREAM_API_KEY or STREAM_API_SECRET is missing")
+}
+
+export const chatClient = StreamChat.getInstance(apiKey, apiSecret) //this is for chat features
+
+export const streamClient = new StreamClient(apiKey, apiSecret) // will be used for video calls
+
+export const upsertStreamUser = async (userData) => {
+    try {
+        await chatClient.upsertUser(userData)
+        console.log("Stream user upserted successfully:", userData)
+    } catch (error) {
+        console.error("Error upserting Stream user:", error)
+    }
+}
+
+export const deleteStreamUser = async (userId) => {
+    try {
+        await chatClient.deleteUser(userId)
+        console.log("Stream user deleted successfully", userId)
+    } catch (error) {
+        console.error("Error deleting the Stream user:", error)
+    }
+}
+</file>
+
+<file path="src/middleware/protectRoute.js">
+import { requireAuth } from '@clerk/express'
+import User from "../models/User.js"
+
+export const protectRoute = [
+    requireAuth(), // requireAuth({signInUrl: "/sign-in"}) dont let requireAuth() to take us to home page
+
+    async (req, res, next) => {
+        try {
+            const clerkID = req.auth().userId;
+
+            console.log("Current Clerk ID:", clerkID);
+
+
+            if (!clerkID) return res.status(401).json({ message: "Unauthorized - invalid token" })
+
+            //find user in db by clerk ID
+            const user = await User.findOne({ clerkID })
+
+            console.log("Mongo User:", user);
+
+            if (!user) return res.status(404).json({ message: "User not found" })
+
+            //attach user to req
+            req.user = user;
+
+            next()
+
+        } catch (error) {
+            console.error("Error in protectRoute middleware", error)
+            res.status(500).json({ message: "Internal Server Error" })
+
+
+        }
+    }
+]
+</file>
+
+<file path="src/models/Session.js">
+import mongoose from "mongoose";
+
+const sessionSchema = new mongoose.Schema({
+    problem: {
+        type: String,
+        required: true,
+    },
+    difficulty: {
+        type: String,
+        enum: ["easy", "medium", "hard"],
+        required: true
+    },
+    host: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    participant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    status: {
+        type: String,
+        enum: ["active", "completed"],
+        default: "active"
+    },
+    //stream video call ID
+    callId: {
+        type: String,
+        default: "",
+    },
+}, { timestamps: true }
+)
+
+const Session = mongoose.model("Session", sessionSchema)
+
+export default Session
+</file>
+
+<file path="src/models/User.js">
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        profileImage: {
+            type: String,
+            default: "",
+        },
+        clerkID: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+    },
+    { timestamps: true } // createdAt, updatedAt
+);
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
+</file>
+
+<file path="src/routes/chatRoutes.js">
+import express from "express"
+import { getStreamToken } from "../controllers/chatController.js";
+import { protectRoute } from "../middleware/protectRoute.js";
+
+const router = express.Router()
+
+router.get("/token", protectRoute, getStreamToken)
+
+export default router;
+</file>
+
+<file path="src/routes/sessionRoutes.js">
+import express from "express"
+import { protectRoute } from "../middleware/protectRoute.js"
+import {
+    createSession,
+    getActiveSessions,
+    getMyRecentSessions,
+    getSessionById,
+    joinSession,
+    endSession,
+} from "../controllers/sessionController.js"
+
+const router = express.Router()
+
+router.post("/", protectRoute, createSession)
+router.get("/active", protectRoute, getActiveSessions)
+router.get("/my-recent", protectRoute, getMyRecentSessions)
+
+router.get("/:id", protectRoute, getSessionById) //:id means id is dynamic
+router.post("/:id/join", protectRoute, joinSession)
+router.post("/:id/end", protectRoute, endSession)
+
+export default router
+</file>
+
+<file path="src/server.js">
+import express from "express";
+import path from "path";
+import cors from "cors";
+import { serve } from "inngest/express";
+import { clerkMiddleware } from "@clerk/express";
+
+import { ENV } from "./lib/env.js";
+import { connectDB } from "./lib/db.js";
+import { inngest, functions } from "./lib/inngest.js";
+
+import chatRoutes from "./routes/chatRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+
+const app = express();
+
+const __dirname = path.resolve();
+
+// middleware
+app.use(express.json());
+// credentials:true meaning?? => server allows a browser to include cookies on request
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+
+// app.use("/api/inngest", serve({ client: inngest, functions }));
+
+
+// app.use(clerkMiddleware()); // this adds auth field to request object: req.auth()
+
+app.use(
+    "/api/inngest",
+    (req, res, next) => {
+        console.log("INNGEST ROUTE HIT");
+        next();
+    },
+    serve({ client: inngest, functions })
+);
+
+app.use(clerkMiddleware());
+
+app.use("/api/chat", chatRoutes);
+app.use("/api/sessions", sessionRoutes);
+
+app.get("/health", (req, res) => {
+    res.status(200).json({ msg: "api is up and running" });
+});
+
+// make our app ready for deployment
+if (ENV.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("/{*any}", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    });
+}
+
+const startServer = async () => {
+    try {
+        await connectDB();
+        app.listen(ENV.PORT, () => console.log("Server is running on port:", ENV.PORT));
+    } catch (error) {
+        console.error("💥 Error starting the server", error);
+    }
+};
+
+startServer();
+</file>
+
+</files>
+</file>
+
+<file path="frontend/src/api/sessions.js">
+import axiosInstance from "../lib/axios";
+
+export const sessionApi = {
+    createSession: async (data) => {
+        const response = await axiosInstance.post("/sessions", data);
+        return response.data;
+    },
+
+    getActiveSessions: async () => {
+        const response = await axiosInstance.get("/sessions/active");
+        return response.data;
+    },
+    getMyRecentSessions: async () => {
+        const response = await axiosInstance.get("/sessions/my-recent");
+        return response.data;
+    },
+
+    getSessionById: async (id) => {
+        const response = await axiosInstance.get(`/sessions/${id}`);
+        return response.data;
+    },
+
+    joinSession: async (id) => {
+        const response = await axiosInstance.post(`/sessions/${id}/join`);
+        return response.data;
+    },
+    endSession: async (id) => {
+        const response = await axiosInstance.post(`/sessions/${id}/end`);
+        return response.data;
+    },
+    getStreamToken: async () => {
+        const response = await axiosInstance.get(`/chat/token`);
+        return response.data;
+    },
+};
+</file>
+
+<file path="frontend/src/components/ActiveSessions.jsx">
+import {
+    ArrowRightIcon,
+    Code2Icon,
+    CrownIcon,
+    SparklesIcon,
+    UsersIcon,
+    ZapIcon,
+    LoaderIcon,
+} from "lucide-react";
+import { Link } from "react-router";
+import { getDifficultyBadgeClass } from "../lib/utils";
+
+function ActiveSessions({ sessions, isLoading, isUserInSession }) {
+    return (
+        <div className="lg:col-span-2 card bg-base-100 border-2 border-primary/20 hover:border-primary/30 h-full">
+            <div className="card-body">
+                {/* HEADERS SECTION */}
+                <div className="flex items-center justify-between mb-6">
+                    {/* TITLE AND ICON */}
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
+                            <ZapIcon className="size-5" />
+                        </div>
+                        <h2 className="text-2xl font-black">Live Sessions</h2>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                        <div className="size-2 bg-success rounded-full" />
+                        <span className="text-sm font-medium text-success">{sessions.length} active</span>
+                    </div>
+                </div>
+
+                {/* SESSIONS LIST */}
+                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    {isLoading ? (
+                        <div className="flex items-center justify-center py-20">
+                            <LoaderIcon className="size-10 animate-spin text-primary" />
+                        </div>
+                    ) : sessions.length > 0 ? (
+                        sessions.map((session) => (
+                            <div
+                                key={session._id}
+                                className="card bg-base-200 border-2 border-base-300 hover:border-primary/50"
+                            >
+                                <div className="flex items-center justify-between gap-4 p-5">
+                                    {/* LEFT SIDE */}
+                                    <div className="flex items-center gap-4 flex-1">
+                                        <div className="relative size-14 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                            <Code2Icon className="size-7 text-white" />
+                                            <div className="absolute -top-1 -right-1 size-4 bg-success rounded-full border-2 border-base-100" />
+                                        </div>
+
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <h3 className="font-bold text-lg truncate">{session.problem}</h3>
+                                                <span
+                                                    className={`badge badge-sm ${getDifficultyBadgeClass(
+                                                        session.difficulty
+                                                    )}`}
+                                                >
+                                                    {session.difficulty.slice(0, 1).toUpperCase() +
+                                                        session.difficulty.slice(1)}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-4 text-sm opacity-80">
+                                                <div className="flex items-center gap-1.5">
+                                                    <CrownIcon className="size-4" />
+                                                    <span className="font-medium">{session.host?.name}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <UsersIcon className="size-4" />
+                                                    <span className="text-xs">{session.participant ? "2/2" : "1/2"}</span>
+                                                </div>
+                                                {session.participant && !isUserInSession(session) ? (
+                                                    <span className="badge badge-error badge-sm">FULL</span>
+                                                ) : (
+                                                    <span className="badge badge-success badge-sm">OPEN</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {session.participant && !isUserInSession(session) ? (
+                                        <button className="btn btn-disabled btn-sm">Full</button>
+                                    ) : (
+                                        <Link to={`/session/${session._id}`} className="btn btn-primary btn-sm gap-2">
+                                            {isUserInSession(session) ? "Rejoin" : "Join"}
+                                            <ArrowRightIcon className="size-4" />
+                                        </Link>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-16">
+                            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center">
+                                <SparklesIcon className="w-10 h-10 text-primary/50" />
+                            </div>
+                            <p className="text-lg font-semibold opacity-70 mb-1">No active sessions</p>
+                            <p className="text-sm opacity-50">Be the first to create one!</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+export default ActiveSessions;
+</file>
+
+<file path="frontend/src/components/CreateSessionModal.jsx">
+import { Code2Icon, LoaderIcon, PlusIcon } from "lucide-react";
+import { PROBLEMS } from "../data/problems";
+
+function CreateSessionModal({
+    isOpen,
+    onClose,
+    roomConfig,
+    setRoomConfig,
+    onCreateRoom,
+    isCreating,
+}) {
+    const problems = Object.values(PROBLEMS);
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="modal modal-open">
+            <div className="modal-box max-w-2xl">
+                <h3 className="font-bold text-2xl mb-6">Create New Session</h3>
+
+                <div className="space-y-8">
+                    {/* PROBLEM SELECTION */}
+                    <div className="space-y-2">
+                        <label className="label">
+                            <span className="label-text font-semibold">Select Problem</span>
+                            <span className="label-text-alt text-error">*</span>
+                        </label>
+
+                        <select
+                            className="select w-full"
+                            value={roomConfig.problem}
+                            onChange={(e) => {
+                                const selectedProblem = problems.find((p) => p.title === e.target.value);
+                                setRoomConfig({
+                                    difficulty: selectedProblem.difficulty,
+                                    problem: e.target.value,
+                                });
+                            }}
+                        >
+                            <option value="" disabled>
+                                Choose a coding problem...
+                            </option>
+
+                            {problems.map((problem) => (
+                                <option key={problem.id} value={problem.title}>
+                                    {problem.title} ({problem.difficulty})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* ROOM SUMMARY */}
+                    {roomConfig.problem && (
+                        <div className="alert alert-success">
+                            <Code2Icon className="size-5" />
+                            <div>
+                                <p className="font-semibold">Room Summary:</p>
+                                <p>
+                                    Problem: <span className="font-medium">{roomConfig.problem}</span>
+                                </p>
+                                <p>
+                                    Max Participants: <span className="font-medium">2 (1-on-1 session)</span>
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="modal-action">
+                    <button className="btn btn-ghost" onClick={onClose}>
+                        Cancel
+                    </button>
+
+                    <button
+                        className="btn btn-primary gap-2"
+                        onClick={onCreateRoom}
+                        disabled={isCreating || !roomConfig.problem}
+                    >
+                        {isCreating ? (
+                            <LoaderIcon className="size-5 animate-spin" />
+                        ) : (
+                            <PlusIcon className="size-5" />
+                        )}
+
+                        {isCreating ? "Creating..." : "Create"}
+                    </button>
+                </div>
+            </div>
+            <div className="modal-backdrop" onClick={onClose}></div>
+        </div>
+    );
+}
+export default CreateSessionModal;
+</file>
+
+<file path="frontend/src/components/RecentSessions.jsx">
+import { Code2, Clock, Users, Trophy, Loader } from "lucide-react";
+import { getDifficultyBadgeClass } from "../lib/utils";
+import { formatDistanceToNow } from "date-fns";
+
+function RecentSessions({ sessions, isLoading }) {
+    return (
+        <div className="card bg-base-100 border-2 border-accent/20 hover:border-accent/30 mt-8">
+            <div className="card-body">
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-gradient-to-br from-accent to-secondary rounded-xl">
+                        <Clock className="w-5 h-5 text-white" />
+                    </div>
+                    <h2 className="text-2xl font-black">Your Past Sessions</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {isLoading ? (
+                        <div className="col-span-full flex items-center justify-center py-20">
+                            <Loader className="w-10 h-10 animate-spin text-primary" />
+                        </div>
+                    ) : sessions.length > 0 ? (
+                        sessions.map((session) => (
+                            <div
+                                key={session._id}
+                                className={`card relative ${session.status === "active"
+                                        ? "bg-success/10 border-success/30 hover:border-success/60"
+                                        : "bg-base-200 border-base-300 hover:border-primary/30"
+                                    }`}
+                            >
+                                {session.status === "active" && (
+                                    <div className="absolute top-3 right-3">
+                                        <div className="badge badge-success gap-1">
+                                            <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
+                                            ACTIVE
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="card-body p-5">
+                                    <div className="flex items-start gap-3 mb-4">
+                                        <div
+                                            className={`w-12 h-12 rounded-xl flex items-center justify-center ${session.status === "active"
+                                                    ? "bg-gradient-to-br from-success to-success/70"
+                                                    : "bg-gradient-to-br from-primary to-secondary"
+                                                }`}
+                                        >
+                                            <Code2 className="w-6 h-6 text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h3 className="font-bold text-base mb-1 truncate">{session.problem}</h3>
+                                            <span
+                                                className={`badge badge-sm ${getDifficultyBadgeClass(session.difficulty)}`}
+                                            >
+                                                {session.difficulty}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2 text-sm opacity-80 mb-4">
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4" />
+                                            <span>
+                                                {formatDistanceToNow(new Date(session.createdAt), {
+                                                    addSuffix: true,
+                                                })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Users className="w-4 h-4" />
+                                            <span>
+                                                {session.participant ? "2" : "1"} participant
+                                                {session.participant ? "s" : ""}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center justify-between pt-3 border-t border-base-300">
+                                        <span className="text-xs font-semibold opacity-80 uppercase">Completed</span>
+                                        <span className="text-xs opacity-40">
+                                            {new Date(session.updatedAt).toLocaleDateString()}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="col-span-full text-center py-16">
+                            <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-accent/20 to-secondary/20 rounded-3xl flex items-center justify-center">
+                                <Trophy className="w-10 h-10 text-accent/50" />
+                            </div>
+                            <p className="text-lg font-semibold opacity-70 mb-1">No sessions yet</p>
+                            <p className="text-sm opacity-50">Start your coding journey today!</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default RecentSessions;
+</file>
+
+<file path="frontend/src/components/StatsCards.jsx">
+import { TrophyIcon, UsersIcon } from "lucide-react";
+
+function StatsCards({ activeSessionsCount, recentSessionsCount }) {
+    return (
+        <div className="lg:col-span-1 grid grid-cols-1 gap-6">
+            {/* Active Count */}
+            <div className="card bg-base-100 border-2 border-primary/20 hover:border-primary/40">
+                <div className="card-body">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 bg-primary/10 rounded-2xl">
+                            <UsersIcon className="w-7 h-7 text-primary" />
+                        </div>
+                        <div className="badge badge-primary">Live</div>
+                    </div>
+                    <div className="text-4xl font-black mb-1">{activeSessionsCount}</div>
+                    <div className="text-sm opacity-60">Active Sessions</div>
+                </div>
+            </div>
+
+            {/* Recent Count */}
+            <div className="card bg-base-100 border-2 border-secondary/20 hover:border-secondary/40">
+                <div className="card-body">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 bg-secondary/10 rounded-2xl">
+                            <TrophyIcon className="w-7 h-7 text-secondary" />
+                        </div>
+                    </div>
+                    <div className="text-4xl font-black mb-1">{recentSessionsCount}</div>
+                    <div className="text-sm opacity-60">Total Sessions</div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default StatsCards;
+</file>
+
+<file path="frontend/src/components/WelcomeSection.jsx">
+import { useUser } from "@clerk/clerk-react";
+import { ArrowRightIcon, SparklesIcon, ZapIcon } from "lucide-react";
+
+function WelcomeSection({ onCreateSession }) {
+    const { user } = useUser();
+
+    return (
+        <div className="relative overflow-hidden">
+            <div className="relative max-w-7xl mx-auto px-6 py-16">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <SparklesIcon className="w-6 h-6 text-white" />
+                            </div>
+                            <h1 className="text-5xl font-black bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                                Welcome back, {user?.firstName || "there"}!
+                            </h1>
+                        </div>
+                        <p className="text-xl text-base-content/60 ml-16">
+                            Ready to level up your coding skills?
+                        </p>
+                    </div>
+                    <button
+                        onClick={onCreateSession}
+                        className="group px-8 py-4 bg-gradient-to-r from-primary to-secondary rounded-2xl transition-all duration-200 hover:opacity-90"
+                    >
+                        <div className="flex items-center gap-3 text-white font-bold text-lg">
+                            <ZapIcon className="w-6 h-6" />
+                            <span>Create Session</span>
+                            <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+export default WelcomeSection;
+</file>
+
+<file path="frontend/src/hooks/useSessions.js">
+import { useMutation, useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+import { sessionApi } from "../api/sessions";
+
+export const useCreateSession = () => {
+    const result = useMutation({
+        mutationKey: ["createSession"],
+        mutationFn: sessionApi.createSession,
+        onSuccess: () => toast.success("Session created successfully!"),
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to create room"),
+    });
+
+    return result;
+};
+
+export const useActiveSessions = () => {
+    const result = useQuery({
+        queryKey: ["activeSessions"],
+        queryFn: sessionApi.getActiveSessions,
+    });
+
+    return result;
+};
+
+export const useMyRecentSessions = () => {
+    const result = useQuery({
+        queryKey: ["myRecentSessions"],
+        queryFn: sessionApi.getMyRecentSessions,
+    });
+
+    return result;
+};
+
+export const useSessionById = (id) => {
+    const result = useQuery({
+        queryKey: ["session", id],
+        queryFn: () => sessionApi.getSessionById(id),
+        enabled: !!id,
+        refetchInterval: 5000, // refetch every 5 seconds to detect session status changes
+    });
+
+    return result;
+};
+
+export const useJoinSession = () => {
+    const result = useMutation({
+        mutationKey: ["joinSession"],
+        mutationFn: sessionApi.joinSession,
+        onSuccess: () => toast.success("Joined session successfully!"),
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to join session"),
+    });
+
+    return result;
+};
+
+export const useEndSession = () => {
+    const result = useMutation({
+        mutationKey: ["endSession"],
+        mutationFn: sessionApi.endSession,
+        onSuccess: () => toast.success("Session ended successfully!"),
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to end session"),
+    });
+
+    return result;
+};
+</file>
+
+<file path=".gitignore">
+node_modules
+.env
+.DS_Store
+</file>
+
+<file path="backend/src/controllers/chatController.js">
+import { chatClient } from "../lib/stream.js";
+
+export async function getStreamToken(req, res) {
+    try {
+
+        //use clerkID for stream (not mongodb _id)=> it should match the id we have in the stream
+        const token = chatClient.createToken(req.user.clerkID)
+
+        res.status(200).json({
+            token,
+            userId: req.user.clerkID,
+            userName: req.user.name,
+            userImage: req.user.image,
+        })
+    } catch (error) {
+        console.log("Error in getStreamToken controller", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+
+    }
+}
+</file>
+
+<file path="backend/src/models/Session.js">
+import mongoose from "mongoose";
+
+const sessionSchema = new mongoose.Schema({
+    problem: {
+        type: String,
+        required: true,
+    },
+    difficulty: {
+        type: String,
+        enum: ["easy", "medium", "hard"],
+        required: true
+    },
+    host: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
+    participant: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
+    status: {
+        type: String,
+        enum: ["active", "completed"],
+        default: "active"
+    },
+    //stream video call ID
+    callId: {
+        type: String,
+        default: "",
+    },
+}, { timestamps: true }
+)
+
+const Session = mongoose.model("Session", sessionSchema)
+
+export default Session
+</file>
+
+<file path="backend/src/routes/chatRoutes.js">
+import express from "express"
+import { getStreamToken } from "../controllers/chatController.js";
+import { protectRoute } from "../middleware/protectRoute.js";
+
+const router = express.Router()
+
+router.get("/token", protectRoute, getStreamToken)
+
+export default router;
+</file>
+
+<file path="backend/src/routes/sessionRoutes.js">
+import express from "express"
+import { protectRoute } from "../middleware/protectRoute.js"
+import {
+    createSession,
+    getActiveSessions,
+    getMyRecentSessions,
+    getSessionById,
+    joinSession,
+    endSession,
+} from "../controllers/sessionController.js"
+
+const router = express.Router()
+
+router.post("/", protectRoute, createSession)
+router.get("/active", protectRoute, getActiveSessions)
+router.get("/my-recent", protectRoute, getMyRecentSessions)
+
+router.get("/:id", protectRoute, getSessionById) //:id means id is dynamic
+router.post("/:id/join", protectRoute, joinSession)
+router.post("/:id/end", protectRoute, endSession)
+
+export default router
+</file>
+
+<file path="frontend/.gitignore">
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+</file>
+
+<file path="frontend/eslint.config.js">
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs['recommended-latest'],
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+</file>
+
+<file path="frontend/public/vite.svg">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="31.88" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 257"><defs><linearGradient id="IconifyId1813088fe1fbc01fb466" x1="-.828%" x2="57.636%" y1="7.652%" y2="78.411%"><stop offset="0%" stop-color="#41D1FF"></stop><stop offset="100%" stop-color="#BD34FE"></stop></linearGradient><linearGradient id="IconifyId1813088fe1fbc01fb467" x1="43.376%" x2="50.316%" y1="2.242%" y2="89.03%"><stop offset="0%" stop-color="#FFEA83"></stop><stop offset="8.333%" stop-color="#FFDD35"></stop><stop offset="100%" stop-color="#FFA800"></stop></linearGradient></defs><path fill="url(#IconifyId1813088fe1fbc01fb466)" d="M255.153 37.938L134.897 252.976c-2.483 4.44-8.862 4.466-11.382.048L.875 37.958c-2.746-4.814 1.371-10.646 6.827-9.67l120.385 21.517a6.537 6.537 0 0 0 2.322-.004l117.867-21.483c5.438-.991 9.574 4.796 6.877 9.62Z"></path><path fill="url(#IconifyId1813088fe1fbc01fb467)" d="M185.432.063L96.44 17.501a3.268 3.268 0 0 0-2.634 3.014l-5.474 92.456a3.268 3.268 0 0 0 3.997 3.378l24.777-5.718c2.318-.535 4.413 1.507 3.936 3.838l-7.361 36.047c-.495 2.426 1.782 4.5 4.151 3.78l15.304-4.649c2.372-.72 4.652 1.36 4.15 3.788l-11.698 56.621c-.732 3.542 3.979 5.473 5.943 2.437l1.313-2.028l72.516-144.72c1.215-2.423-.88-5.186-3.54-4.672l-25.505 4.922c-2.396.462-4.435-1.77-3.759-4.114l16.646-57.705c.677-2.35-1.37-4.583-3.769-4.113Z"></path></svg>
+</file>
+
+<file path="frontend/README.md">
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+</file>
+
+<file path="frontend/src/components/Navbar.jsx">
+import { Link, useLocation } from "react-router";
+import { BookOpenIcon, LayoutDashboardIcon, BrainCircuit } from "lucide-react";
+import { UserButton } from "@clerk/clerk-react";
+
+function Navbar() {
+    const location = useLocation();
+
+    console.log(location);
+
+    const isActive = (path) => location.pathname === path;
+
+    return (
+        <nav className="bg-base-100/80 backdrop-blur-md border-b border-primary/20 sticky top-0 z-50 shadow-lg">
+            <div className="max-w-7xl mx-auto p-4 flex items-center justify-between">
+                {/* LOGO */}
+                <Link
+                    to="/"
+                    className="group flex items-center gap-3 hover:scale-105 transition-transform duration-200"
+                >
+                    <div className="size-10 rounded-xl bg-gradient-to-r from-primary via-secondary to-accent flex items-center justify-center shadow-lg ">
+                        <BrainCircuit className="size-6 text-white" />
+                    </div>
+
+                    <div className="flex flex-col">
+                        <span className="font-black text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent font-mono tracking-wider">
+                            Talent IQ
+                        </span>
+                        <span className="text-xs text-base-content/60 font-medium -mt-1">Code Together</span>
+                    </div>
+                </Link>
+
+                <div className="flex items-center gap-1">
+                    {/* PROBLEMS PAGE LINK */}
+                    <Link
+                        to={"/problems"}
+                        className={`px-4 py-2.5 rounded-lg transition-all duration-200 
+              ${isActive("/problems")
+                                ? "bg-primary text-primary-content"
+                                : "hover:bg-base-200 text-base-content/70 hover:text-base-content"
+                            }
+              
+              `}
+                    >
+                        <div className="flex items-center gap-x-2.5">
+                            <BookOpenIcon className="size-4" />
+                            <span className="font-medium hidden sm:inline">Problems</span>
+                        </div>
+                    </Link>
+
+                    {/* DASHBORD PAGE LINK */}
+                    <Link
+                        to={"/dashboard"}
+                        className={`px-4 py-2.5 rounded-lg transition-all duration-200 
+              ${isActive("/dashboard")
+                                ? "bg-primary text-primary-content"
+                                : "hover:bg-base-200 text-base-content/70 hover:text-base-content"
+                            }
+              
+              `}
+                    >
+                        <div className="flex items-center gap-x-2.5">
+                            <LayoutDashboardIcon className="size-4" />
+                            <span className="font-medium hidden sm:inline">Dashbord</span>
+                        </div>
+                    </Link>
+
+                    <div className="ml-4 mt-2">
+                        <UserButton />
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+}
+export default Navbar;
+</file>
+
+<file path="frontend/src/data/problems.js">
+export const PROBLEMS = {
+    "two-sum": {
+        id: "two-sum",
+        title: "Two Sum",
+        difficulty: "Easy",
+        category: "Array • Hash Table",
+        description: {
+            text: "Given an array of integers nums and an integer target, return indices of the two numbers in the array such that they add up to target.",
+            notes: [
+                "You may assume that each input would have exactly one solution, and you may not use the same element twice.",
+                "You can return the answer in any order.",
+            ],
+        },
+        examples: [
+            {
+                input: "nums = [2,7,11,15], target = 9",
+                output: "[0,1]",
+                explanation: "Because nums[0] + nums[1] == 9, we return [0, 1].",
+            },
+            {
+                input: "nums = [3,2,4], target = 6",
+                output: "[1,2]",
+            },
+            {
+                input: "nums = [3,3], target = 6",
+                output: "[0,1]",
+            },
+        ],
+        constraints: [
+            "2 ≤ nums.length ≤ 10⁴",
+            "-10⁹ ≤ nums[i] ≤ 10⁹",
+            "-10⁹ ≤ target ≤ 10⁹",
+            "Only one valid answer exists",
+        ],
+        starterCode: {
+            javascript: `function twoSum(nums, target) {
+  // Write your solution here
+  
+}
+
+// Test cases
+console.log(twoSum([2, 7, 11, 15], 9)); // Expected: [0, 1]
+console.log(twoSum([3, 2, 4], 6)); // Expected: [1, 2]
+console.log(twoSum([3, 3], 6)); // Expected: [0, 1]`,
+            python: `def twoSum(nums, target):
+    # Write your solution here
+    pass
+
+# Test cases
+print(twoSum([2, 7, 11, 15], 9))  # Expected: [0, 1]
+print(twoSum([3, 2, 4], 6))  # Expected: [1, 2]
+print(twoSum([3, 3], 6))  # Expected: [0, 1]`,
+            java: `import java.util.*;
+
+class Solution {
+    public static int[] twoSum(int[] nums, int target) {
+        // Write your solution here
+        
+        return new int[0];
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(Arrays.toString(twoSum(new int[]{2, 7, 11, 15}, 9))); // Expected: [0, 1]
+        System.out.println(Arrays.toString(twoSum(new int[]{3, 2, 4}, 6))); // Expected: [1, 2]
+        System.out.println(Arrays.toString(twoSum(new int[]{3, 3}, 6))); // Expected: [0, 1]
+    }
+}`,
+        },
+        expectedOutput: {
+            javascript: "[0,1]\n[1,2]\n[0,1]",
+            python: "[0, 1]\n[1, 2]\n[0, 1]",
+            java: "[0, 1]\n[1, 2]\n[0, 1]",
+        },
+    },
+
+    "reverse-string": {
+        id: "reverse-string",
+        title: "Reverse String",
+        difficulty: "Easy",
+        category: "String • Two Pointers",
+        description: {
+            text: "Write a function that reverses a string. The input string is given as an array of characters s.",
+            notes: ["You must do this by modifying the input array in-place with O(1) extra memory."],
+        },
+        examples: [
+            {
+                input: 's = ["h","e","l","l","o"]',
+                output: '["o","l","l","e","h"]',
+            },
+            {
+                input: 's = ["H","a","n","n","a","h"]',
+                output: '["h","a","n","n","a","H"]',
+            },
+        ],
+        constraints: ["1 ≤ s.length ≤ 10⁵", "s[i] is a printable ascii character"],
+        starterCode: {
+            javascript: `function reverseString(s) {
+  // Write your solution here
+  
+}
+
+// Test cases
+let test1 = ["h","e","l","l","o"];
+reverseString(test1);
+console.log(test1); // Expected: ["o","l","l","e","h"]
+
+let test2 = ["H","a","n","n","a","h"];
+reverseString(test2);
+console.log(test2); // Expected: ["h","a","n","n","a","H"]`,
+            python: `def reverseString(s):
+    # Write your solution here
+    pass
+
+# Test cases
+test1 = ["h","e","l","l","o"]
+reverseString(test1)
+print(test1)  # Expected: ["o","l","l","e","h"]
+
+test2 = ["H","a","n","n","a","h"]
+reverseString(test2)
+print(test2)  # Expected: ["h","a","n","n","a","H"]`,
+            java: `import java.util.*;
+
+class Solution {
+    public static void reverseString(char[] s) {
+        // Write your solution here
+        
+    }
+    
+    public static void main(String[] args) {
+        char[] test1 = {'h','e','l','l','o'};
+        reverseString(test1);
+        System.out.println(Arrays.toString(test1)); // Expected: [o, l, l, e, h]
+        
+        char[] test2 = {'H','a','n','n','a','h'};
+        reverseString(test2);
+        System.out.println(Arrays.toString(test2)); // Expected: [h, a, n, n, a, H]
+    }
+}`,
+        },
+        expectedOutput: {
+            javascript: '["o","l","l","e","h"]\n["h","a","n","n","a","H"]',
+            python: "['o', 'l', 'l', 'e', 'h']\n['h', 'a', 'n', 'n', 'a', 'H']",
+            java: "[o, l, l, e, h]\n[h, a, n, n, a, H]",
+        },
+    },
+
+    "valid-palindrome": {
+        id: "valid-palindrome",
+        title: "Valid Palindrome",
+        difficulty: "Easy",
+        category: "String • Two Pointers",
+        description: {
+            text: "A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward. Alphanumeric characters include letters and numbers.",
+            notes: ["Given a string s, return true if it is a palindrome, or false otherwise."],
+        },
+        examples: [
+            {
+                input: 's = "A man, a plan, a canal: Panama"',
+                output: "true",
+                explanation: '"amanaplanacanalpanama" is a palindrome.',
+            },
+            {
+                input: 's = "race a car"',
+                output: "false",
+                explanation: '"raceacar" is not a palindrome.',
+            },
+            {
+                input: 's = " "',
+                output: "true",
+                explanation:
+                    's is an empty string "" after removing non-alphanumeric characters. Since an empty string reads the same forward and backward, it is a palindrome.',
+            },
+        ],
+        constraints: ["1 ≤ s.length ≤ 2 * 10⁵", "s consists only of printable ASCII characters"],
+        starterCode: {
+            javascript: `function isPalindrome(s) {
+  // Write your solution here
+  
+}
+
+// Test cases
+console.log(isPalindrome("A man, a plan, a canal: Panama")); // Expected: true
+console.log(isPalindrome("race a car")); // Expected: false
+console.log(isPalindrome(" ")); // Expected: true`,
+            python: `def isPalindrome(s):
+    # Write your solution here
+    pass
+
+# Test cases
+print(isPalindrome("A man, a plan, a canal: Panama"))  # Expected: True
+print(isPalindrome("race a car"))  # Expected: False
+print(isPalindrome(" "))  # Expected: True`,
+            java: `class Solution {
+    public static boolean isPalindrome(String s) {
+        // Write your solution here
+        
+        return false;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(isPalindrome("A man, a plan, a canal: Panama")); // Expected: true
+        System.out.println(isPalindrome("race a car")); // Expected: false
+        System.out.println(isPalindrome(" ")); // Expected: true
+    }
+}`,
+        },
+        expectedOutput: {
+            javascript: "true\nfalse\ntrue",
+            python: "True\nFalse\nTrue",
+            java: "true\nfalse\ntrue",
+        },
+    },
+
+    "maximum-subarray": {
+        id: "maximum-subarray",
+        title: "Maximum Subarray",
+        difficulty: "Medium",
+        category: "Array • Dynamic Programming",
+        description: {
+            text: "Given an integer array nums, find the subarray with the largest sum, and return its sum.",
+            notes: [],
+        },
+        examples: [
+            {
+                input: "nums = [-2,1,-3,4,-1,2,1,-5,4]",
+                output: "6",
+                explanation: "The subarray [4,-1,2,1] has the largest sum 6.",
+            },
+            {
+                input: "nums = [1]",
+                output: "1",
+                explanation: "The subarray [1] has the largest sum 1.",
+            },
+            {
+                input: "nums = [5,4,-1,7,8]",
+                output: "23",
+                explanation: "The subarray [5,4,-1,7,8] has the largest sum 23.",
+            },
+        ],
+        constraints: ["1 ≤ nums.length ≤ 10⁵", "-10⁴ ≤ nums[i] ≤ 10⁴"],
+        starterCode: {
+            javascript: `function maxSubArray(nums) {
+  // Write your solution here
+  
+}
+
+// Test cases
+console.log(maxSubArray([-2,1,-3,4,-1,2,1,-5,4])); // Expected: 6
+console.log(maxSubArray([1])); // Expected: 1
+console.log(maxSubArray([5,4,-1,7,8])); // Expected: 23`,
+            python: `def maxSubArray(nums):
+    # Write your solution here
+    pass
+
+# Test cases
+print(maxSubArray([-2,1,-3,4,-1,2,1,-5,4]))  # Expected: 6
+print(maxSubArray([1]))  # Expected: 1
+print(maxSubArray([5,4,-1,7,8]))  # Expected: 23`,
+            java: `class Solution {
+    public static int maxSubArray(int[] nums) {
+        // Write your solution here
+        
+        return 0;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(maxSubArray(new int[]{-2,1,-3,4,-1,2,1,-5,4})); // Expected: 6
+        System.out.println(maxSubArray(new int[]{1})); // Expected: 1
+        System.out.println(maxSubArray(new int[]{5,4,-1,7,8})); // Expected: 23
+    }
+}`,
+        },
+        expectedOutput: {
+            javascript: "6\n1\n23",
+            python: "6\n1\n23",
+            java: "6\n1\n23",
+        },
+    },
+
+    "container-with-most-water": {
+        id: "container-with-most-water",
+        title: "Container With Most Water",
+        difficulty: "Medium",
+        category: "Array • Two Pointers",
+        description: {
+            text: "You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).",
+            notes: [
+                "Find two lines that together with the x-axis form a container, such that the container contains the most water.",
+                "Return the maximum amount of water a container can store.",
+                "Notice that you may not slant the container.",
+            ],
+        },
+        examples: [
+            {
+                input: "height = [1,8,6,2,5,4,8,3,7]",
+                output: "49",
+                explanation:
+                    "The vertical lines are represented by array [1,8,6,2,5,4,8,3,7]. In this case, the max area of water the container can contain is 49.",
+            },
+            {
+                input: "height = [1,1]",
+                output: "1",
+            },
+        ],
+        constraints: ["n == height.length", "2 ≤ n ≤ 10⁵", "0 ≤ height[i] ≤ 10⁴"],
+        starterCode: {
+            javascript: `function maxArea(height) {
+  // Write your solution here
+  
+}
+
+// Test cases
+console.log(maxArea([1,8,6,2,5,4,8,3,7])); // Expected: 49
+console.log(maxArea([1,1])); // Expected: 1`,
+            python: `def maxArea(height):
+    # Write your solution here
+    pass
+
+# Test cases
+print(maxArea([1,8,6,2,5,4,8,3,7]))  # Expected: 49
+print(maxArea([1,1]))  # Expected: 1`,
+            java: `class Solution {
+    public static int maxArea(int[] height) {
+        // Write your solution here
+        
+        return 0;
+    }
+    
+    public static void main(String[] args) {
+        System.out.println(maxArea(new int[]{1,8,6,2,5,4,8,3,7})); // Expected: 49
+        System.out.println(maxArea(new int[]{1,1})); // Expected: 1
+    }
+}`,
+        },
+        expectedOutput: {
+            javascript: "49\n1",
+            python: "49\n1",
+            java: "49\n1",
+        },
+    },
+};
+
+export const LANGUAGE_CONFIG = {
+    javascript: {
+        name: "JavaScript",
+        icon: "/javascript.png",
+        monacoLang: "javascript",
+    },
+    python: {
+        name: "Python",
+        icon: "/python.png",
+        monacoLang: "python",
+    },
+    java: {
+        name: "Java",
+        icon: "/java.png",
+        monacoLang: "java",
+    },
+};
+</file>
+
+<file path="frontend/src/lib/axios.js">
+import axios from "axios"
+
+const axiosInstance = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+    withCredentials: true //by adding thus field browser will send the cookies to server automatically, on every single req
+})
+
+export default axiosInstance;
+</file>
+
+<file path="frontend/src/lib/piston.js">
+import { version } from "react"
+
+// Piston API is a service for code execution
+const PISTON_API = "https://emkc.org/api/v2/piston"
+
+const LANGUAGE_VERSIONS = {
+    javascript: { language: "javascript", version: "18.15.0" },
+    python: { language: "python", version: "3.10.0" },
+    java: { language: "java", version: "15.0.2" },
+
+}
+
+/**
+ * 
+ * @param {string} language - programming langauge
+ * @param {string} code - source code to executed
+ * @returns {Promise<{success:boolean, output?:string, error?: string}>} 
+ */
+
+
+export async function executeCode(language, code) {
+    try {
+        const languageConfig = LANGUAGE_VERSIONS[language]
+
+        if (!languageConfig) {
+            return {
+                success: false,
+                error: `Unsupported language: ${language}`
+            }
+        }
+
+        const response = await fetch(`${PISTON_API}/execute`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                language: languageConfig.language,
+                version: languageConfig.version,
+                files: [
+                    {
+                        name: `main.${getFileExtension(language)}`,
+                        content: code,
+                    },
+                ],
+            }),
+
+        });
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: `HTTP error! status: ${response.status}`
+            }
+        }
+
+        const data = await response.json()
+
+        const output = data.run.output || ""
+        const stderr = data.run.stderr || ""
+
+        if (stderr) {
+            return {
+                success: false,
+                output: output,
+                error: stderr
+            }
+        }
+
+        return {
+            success: true,
+            output: output || "No output"
+        }
+
+    } catch (error) {
+        return {
+            success: false,
+            error: `Failed to execute code: ${error.message}`,
+        };
+
+    }
+
+}
+
+function getFileExtension(language) {
+    const extensions = {
+        javascript: "js",
+        python: "py",
+        java: "java",
+    };
+
+    return extensions[language] || "txt";
+}
+</file>
+
+<file path="frontend/src/lib/utils.js">
+export const getDifficultyBadgeClass = (difficulty) => {
+    switch (difficulty.toLowerCase()) {
+        case 'easy':
+            return 'badge-success';
+        case 'medium':
+            return 'badge-warning';
+        case 'hard':
+            return 'badge-error';
+        default:
+            return 'badge-ghost';
+    }
+};
+</file>
+
+<file path="frontend/src/pages/DashboardPage.jsx">
+import { useNavigate } from "react-router";
+import { useUser } from "@clerk/clerk-react";
+import { useState } from "react";
+import { useActiveSessions, useCreateSession, useMyRecentSessions } from "../hooks/useSessions";
+
+import Navbar from "../components/Navbar";
+import WelcomeSection from "../components/WelcomeSection";
+import StatsCards from "../components/StatsCards";
+import ActiveSessions from "../components/ActiveSessions";
+import RecentSessions from "../components/RecentSessions";
+import CreateSessionModal from "../components/CreateSessionModal";
+
+function DashboardPage() {
+    const navigate = useNavigate();
+    const { user } = useUser();
+    const [showCreateModal, setShowCreateModal] = useState(false);
+    const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "" });
+
+    const createSessionMutation = useCreateSession();
+
+    const { data: activeSessionsData, isLoading: loadingActiveSessions } = useActiveSessions();
+    const { data: recentSessionsData, isLoading: loadingRecentSessions } = useMyRecentSessions();
+
+    const handleCreateRoom = () => {
+        if (!roomConfig.problem || !roomConfig.difficulty) return;
+
+        createSessionMutation.mutate(
+            {
+                problem: roomConfig.problem,
+                difficulty: roomConfig.difficulty.toLowerCase(),
+            },
+            {
+                onSuccess: (data) => {
+                    setShowCreateModal(false);
+                    navigate(`/session/${data.session._id}`);
+                },
+            }
+        );
+    };
+
+    const activeSessions = activeSessionsData?.sessions || [];
+    const recentSessions = recentSessionsData?.sessions || [];
+
+    const isUserInSession = (session) => {
+        if (!user.id) return false;
+
+        return session.host?.clerkId === user.id || session.participant?.clerkId === user.id;
+    };
+
+    return (
+        <>
+            <div className="min-h-screen bg-base-300">
+                <Navbar />
+                <WelcomeSection onCreateSession={() => setShowCreateModal(true)} />
+
+                {/* Grid layout */}
+                <div className="container mx-auto px-6 pb-16">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <StatsCards
+                            activeSessionsCount={activeSessions.length}
+                            recentSessionsCount={recentSessions.length}
+                        />
+                        <ActiveSessions
+                            sessions={activeSessions}
+                            isLoading={loadingActiveSessions}
+                            isUserInSession={isUserInSession}
+                        />
+                    </div>
+
+                    <RecentSessions sessions={recentSessions} isLoading={loadingRecentSessions} />
+                </div>
+            </div>
+
+            <CreateSessionModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                roomConfig={roomConfig}
+                setRoomConfig={setRoomConfig}
+                onCreateRoom={handleCreateRoom}
+                isCreating={createSessionMutation.isPending}
+            />
+        </>
+    );
+}
+
+export default DashboardPage;
+</file>
+
+<file path="package.json">
+{
+  "name": "talent-iq",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "npm run start --prefix backend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TejpalSandhu/talent-IQ.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TejpalSandhu/talent-IQ/issues"
+  },
+  "homepage": "https://github.com/TejpalSandhu/talent-IQ#readme"
+}
+</file>
+
+<file path="backend/src/controllers/sessionController.js">
+import { MessageSearchSource } from "stream-chat"
+import { chatClient, streamClient } from "../lib/stream.js"
+import Session from "../models/Session.js"
+
+export async function createSession(req, res) {
+    try {
+        const { problem, difficulty } = req.body
+        const userId = req.user._id
+        const clerkID = req.user.clerkID
+
+        if (!problem || !difficulty) {
+            return res.status(400).json({ message: "Problem and Difficulty are required" })
+        }
+
+        //generate a unique call id for stream video
+        const callId = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`
+
+        //create the session in the database
+        const session = await Session.create({ problem, difficulty, host: userId, callId })
+
+        //create stream video call
+        await streamClient.video.call("default", callId).getOrCreate({
+            data: {
+                created_by_id: clerkID,
+                custom: { problem, difficulty, sessionId: session._id.toString() },
+            },
+        })
+
+        //chat messaging
+
+        const channel = chatClient.channel("messaging", callId, {
+            name: `${problem} Session`,
+            created_by_id: clerkID,
+            members: [clerkID],
+        });
+
+        await channel.create();
+        res.status(201).json({ session })
+    } catch (error) {
+        console.log("Error in createSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getActiveSessions(_, res) {
+    try {
+        const sessions = await Session.find({ status: "active" })
+            .populate("host", "name profileImage email clerkID")
+            .sort({ createdAt: -1 })
+            .limit(20); //It fetches the latest 20 active sessions, sorted(descending order) by newest first, and replaces each session’s host ID with the host’s basic profile info.
+
+        res.status(200).json({ sessions })
+
+    } catch (error) {
+        console.log("Error in getActiveSessions controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getMyRecentSessions(req, res) {
+    try {
+        const userId = req.user._id
+        //get sessions where user is either host or participant
+        const sessions = await Session.find({
+            status: "completed",
+            $or: [{ host: userId }, { participant: userId }]
+        })
+            .sort({ createdAt: -1 })
+            .limit(20)
+
+        res.status(200).json({ sessions })
+
+    } catch (error) {
+        console.log("Error in getMyRecentSessions controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function getSessionById(req, res) {
+    try {
+        const { id } = req.params //destructure the value to get id
+
+        const session = await Session.findById(id)
+            .populate("host", "name email profileImage clerkID")
+            .populate("participant", "name email profileImage clerkID")
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        res.status(200).json({ session })
+    } catch (error) {
+        console.log("Error in getSessionById controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+export async function joinSession(req, res) {
+    try {
+        const { id } = req.params
+        const userId = req.user._id
+        const clerkID = req.user.clerkID
+
+        const session = await Session.findById(id)
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        if (session.status !== "active") return res.status(400).json({ message: "Cannot join a completed session" })
+
+        if (session.host.toString() === userId.toString())
+            return res.status(400).json({ message: "Host cannot join their own session as participant" })
+
+        //check if session is already full - has a participant
+        if (session.participant) return res.status(409).json({ message: "Session is full" })
+
+        session.participant = userId
+        await session.save()
+
+        const channel = chatClient.channel("messaging", session.callId)
+        await channel.addMembers([clerkID])
+
+        res.status(200).json({ session })
+
+    } catch (error) {
+        console.log("Error in joinSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+
+//use express-async-handler if code gets bigger instead of try catch everytime
+export async function endSession(req, res) {
+    try {
+        const { id } = req.params
+        const userId = req.user._id
+        const session = await Session.findById(id)
+
+        if (!session) return res.status(404).json({ message: "Session not found" })
+
+        //check if user is the host
+        if (session.host.toString() !== userId.toString()) {
+            res.status(403).json({ message: "Only the host can end the Session" })
+        }
+
+        //check if session is already completed
+        if (session.status === "completed") {
+            return res.status(400).json({ message: "Session is already completed" })
+        }
+
+        // delete stream video call
+        const call = streamClient.video.call("default", session.callId)
+        await call.delete({ hard: true })
+
+        // delete stream chat channel
+        const channel = chatClient.channel("messaging", session.callId)
+        await channel.delete()
+
+        session.status = "completed"
+        await session.save()
+
+        res.status(200).json({ session, message: "Session ended successfully" })
+
+    } catch (error) {
+        console.log("Error in endSession controller:", error.message)
+        res.status(500).json({ message: "Internal Server Error" })
+    }
+}
+</file>
+
+<file path="backend/src/middleware/protectRoute.js">
+import { requireAuth } from '@clerk/express'
+import User from "../models/User.js"
+
+export const protectRoute = [
+    requireAuth(), // requireAuth({signInUrl: "/sign-in"}) dont let requireAuth() to take us to home page
+
+    async (req, res, next) => {
+        try {
+            const clerkID = req.auth().userId;
+
+            console.log("Current Clerk ID:", clerkID);
+
+
+            if (!clerkID) return res.status(401).json({ message: "Unauthorized - invalid token" })
+
+            //find user in db by clerk ID
+            const user = await User.findOne({ clerkID })
+
+            console.log("Mongo User:", user);
+
+            if (!user) return res.status(404).json({ message: "User not found" })
+
+            //attach user to req
+            req.user = user;
+
+            next()
+
+        } catch (error) {
+            console.error("Error in protectRoute middleware", error)
+            res.status(500).json({ message: "Internal Server Error" })
+
+
+        }
+    }
+]
+</file>
+
+<file path="frontend/src/pages/ProblemsPage.jsx">
+import { Link } from "react-router";
+import Navbar from "../components/Navbar";
+
+import { PROBLEMS } from "../data/problems";
+import { ChevronRightIcon, Code2Icon } from "lucide-react";
+import { getDifficultyBadgeClass } from "../lib/utils";
+
+function ProblemsPage() {
+    const problems = Object.values(PROBLEMS);
+
+    const easyProblemsCount = problems.filter((p) => p.difficulty === "Easy").length;
+    const mediumProblemsCount = problems.filter((p) => p.difficulty === "Medium").length;
+    const hardProblemsCount = problems.filter((p) => p.difficulty === "Hard").length;
+
+    return (
+        <div className="min-h-screen bg-base-200">
+            <Navbar />
+
+            <div className="max-w-6xl mx-auto px-4 py-12">
+                {/* HEADER */}
+                <div className="mb-8">
+                    <h1 className="text-4xl font-bold mb-2">Practice Problems</h1>
+                    <p className="text-base-content/70">
+                        Sharpen your coding skills with these curated problems
+                    </p>
+                </div>
+
+                {/* PROBLEMS LIST */}
+                <div className="space-y-4">
+                    {problems.map((problem) => (
+                        <Link
+                            key={problem.id}
+                            to={`/problem/${problem.id}`}
+                            className="card bg-base-100 hover:scale-[1.01] transition-transform"
+                        >
+                            <div className="card-body">
+                                <div className="flex items-center justify-between gap-4">
+                                    {/* LEFT SIDE */}
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                                                <Code2Icon className="size-6 text-primary" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h2 className="text-xl font-bold">{problem.title}</h2>
+                                                    <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
+                                                        {problem.difficulty}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-base-content/60"> {problem.category}</p>
+                                            </div>
+                                        </div>
+                                        <p className="text-base-content/80 mb-3">{problem.description.text}</p>
+                                    </div>
+                                    {/* RIGHT SIDE */}
+
+                                    <div className="flex items-center gap-2 text-primary">
+                                        <span className="font-medium">Solve</span>
+                                        <ChevronRightIcon className="size-5" />
+                                    </div>
+                                </div>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+
+                {/* STATS FOOTER */}
+                <div className="mt-12 card bg-base-100 shadow-lg">
+                    <div className="card-body">
+                        <div className="stats stats-vertical lg:stats-horizontal">
+                            <div className="stat">
+                                <div className="stat-title">Total Problems</div>
+                                <div className="stat-value text-primary">{problems.length}</div>
+                            </div>
+
+                            <div className="stat">
+                                <div className="stat-title">Easy</div>
+                                <div className="stat-value text-success">{easyProblemsCount}</div>
+                            </div>
+                            <div className="stat">
+                                <div className="stat-title">Medium</div>
+                                <div className="stat-value text-warning">{mediumProblemsCount}</div>
+                            </div>
+                            <div className="stat">
+                                <div className="stat-title">Hard</div>
+                                <div className="stat-value text-error">{hardProblemsCount}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+export default ProblemsPage;
+</file>
+
+<file path="frontend/vite.config.js">
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+})
+</file>
+
+<file path="backend/src/lib/stream.js">
+import { StreamChat } from "stream-chat";
+import { StreamClient } from "@stream-io/node-sdk"
+import { ENV } from "./env.js"
+
+const apiKey = ENV.STREAM_API_KEY
+const apiSecret = ENV.STREAM_API_SECRET
+
+if (!apiKey || !apiSecret) {
+    console.error("STREAM_API_KEY or STREAM_API_SECRET is missing")
+}
+
+export const chatClient = StreamChat.getInstance(apiKey, apiSecret) //this is for chat features
+
+export const streamClient = new StreamClient(apiKey, apiSecret) // will be used for video calls
+
+export const upsertStreamUser = async (userData) => {
+    try {
+        await chatClient.upsertUser(userData)
+        console.log("Stream user upserted successfully:", userData)
+    } catch (error) {
+        console.error("Error upserting Stream user:", error)
+    }
+}
+
+export const deleteStreamUser = async (userId) => {
+    try {
+        await chatClient.deleteUser(userId)
+        console.log("Stream user deleted successfully", userId)
+    } catch (error) {
+        console.error("Error deleting the Stream user:", error)
+    }
+}
+</file>
+
+<file path="frontend/index.html">
+<!doctype html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset=" UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vite + React</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
+</file>
+
+<file path="frontend/src/index.css">
+@import "tailwindcss";
+
+@plugin "daisyui" {
+    themes: "all";
+}
+
+/* Add cursor pointer to buttons by defualt - this is coming from tailwind css */
+@layer base {
+
+    button:not(:disabled),
+    [role="button"]:not(:disabled) {
+        cursor: pointer;
+    }
+}
+</file>
+
+<file path="frontend/src/main.jsx">
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import { ClerkProvider } from '@clerk/clerk-react'
+import { BrowserRouter } from 'react-router'
+import {
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
+
+// Import your Publishable Key
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error('Missing Clerk Publishable Key')
+}
+
+const queryClient = new QueryClient()
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
+          <App />
+        </ClerkProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
+  </StrictMode>,
+)
+</file>
+
+<file path="frontend/src/pages/HomePage.jsx">
+import { Link } from "react-router";
+import {
+    ArrowRightIcon,
+    CheckIcon,
+    Code2Icon,
+    BrainCircuit,
+    UsersIcon,
+    VideoIcon,
+    ZapIcon,
+} from "lucide-react";
+import { SignInButton } from "@clerk/clerk-react";
+
+function HomePage() {
+    return (
+        <div className="bg-gradient-to-br from-base-100 via-base-200 to-base-300">
+            {/* NAVBAR */}
+            <nav className="bg-base-100/80 backdrop-blur-md border-b border-primary/20 sticky top-0 z-50 shadow-lg">
+                <div className="max-w-7xl mx-auto p-4 flex items-center justify-between">
+                    {/* LOGO */}
+                    <Link
+                        to={"/"}
+                        className="flex items-center gap-3 hover:scale-105 transition-transform duration-200"
+                    >
+                        <div className="size-10 rounded-xl bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center shadow-lg">
+                            <BrainCircuit className="size-6 text-white" />
+                        </div>
+
+                        <div className="flex flex-col">
+                            <span className="font-black text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent font-mono tracking-wider">
+                                Talent IQ
+                            </span>
+                            <span className="text-xs text-base-content/60 font-medium -mt-1">Code Together</span>
+                        </div>
+                    </Link>
+
+                    {/* AUTH BTN */}
+                    <SignInButton mode="modal">
+                        <button className="group px-6 py-3 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-semibold text-sm shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 flex items-center gap-2">
+                            <span>Get Started</span>
+                            <ArrowRightIcon className="size-4 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                    </SignInButton>
+                </div>
+            </nav>
+
+            {/* HERO SECTION */}
+            <div className="max-w-7xl mx-auto px-4 py-20">
+                <div className="grid lg:grid-cols-2 gap-12 items-center">
+                    {/* LEFT CONTENT */}
+                    <div className="space-y-8">
+                        <div className="badge badge-primary badge-lg">
+                            <ZapIcon className="size-4" />
+                            Real-time Collaboration
+                        </div>
+
+                        <h1 className="text-5xl lg:text-7xl font-black leading-tight">
+                            <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+                                Code Together,
+                            </span>
+                            <br />
+                            <span className="text-base-content">Learn Together</span>
+                        </h1>
+
+                        <p className="text-xl text-base-content/70 leading-relaxed max-w-xl">
+                            The ultimate platform for collaborative coding interviews and pair programming.
+                            Connect face-to-face, code in real-time, and ace your technical interviews.
+                        </p>
+
+                        {/* FEATURE PILLS */}
+                        <div className="flex flex-wrap gap-3">
+                            <div className="badge badge-lg badge-outline">
+                                <CheckIcon className="size-4 text-success" />
+                                Live Video Chat
+                            </div>
+                            <div className="badge badge-lg badge-outline">
+                                <CheckIcon className="size-4 text-success" />
+                                Code Editor
+                            </div>
+                            <div className="badge badge-lg badge-outline">
+                                <CheckIcon className="size-4 text-success" />
+                                Multi-Language
+                            </div>
+                        </div>
+
+                        {/* CTA Buttons */}
+                        <div className="flex flex-wrap gap-4">
+                            <SignInButton mode="modal">
+                                <button className="btn btn-primary btn-lg">
+                                    Start Coding Now
+                                    <ArrowRightIcon className="size-5" />
+                                </button>
+                            </SignInButton>
+
+                            <button className="btn btn-outline btn-lg">
+                                <VideoIcon className="size-5" />
+                                Watch Demo
+                            </button>
+                        </div>
+
+                        {/* STATS */}
+                        <div className="stats stats-vertical lg:stats-horizontal bg-base-100 shadow-lg">
+                            <div className="stat">
+                                <div className="stat-value text-primary">10K+</div>
+                                <div className="stat-title">Active Users</div>
+                            </div>
+                            <div className="stat">
+                                <div className="stat-value text-secondary">50K+</div>
+                                <div className="stat-title">Sessions</div>
+                            </div>
+                            <div className="stat">
+                                <div className="stat-value text-accent">99.9%</div>
+                                <div className="stat-title">Uptime</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT IMAGE */}
+                    <img
+                        src="/hero.png"
+                        alt="CodeCollab Platform"
+                        className="w-full h-auto rounded-3xl shadow-2xl border-4 border-base-100 hover:scale-105 transition-transform duration-500"
+                    />
+                </div>
+            </div>
+
+            {/* FEATURES SECTION */}
+            <div className="max-w-7xl mx-auto px-4 py-20">
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl font-bold mb-4">
+                        Everything You Need to <span className="text-primary font-mono">Succeed</span>
+                    </h2>
+                    <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
+                        Powerful features designed to make your coding interviews seamless and productive
+                    </p>
+                </div>
+
+                {/* FEATURES GRID */}
+                <div className="grid md:grid-cols-3 gap-8">
+                    {/* Feature 1 */}
+                    <div className="card bg-base-100 shadow-xl">
+                        <div className="card-body items-center text-center">
+                            <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+                                <VideoIcon className="size-8 text-primary" />
+                            </div>
+                            <h3 className="card-title">HD Video Call</h3>
+                            <p className="text-base-content/70">
+                                Crystal clear video and audio for seamless communication during interviews
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Feature 2 */}
+                    <div className="card bg-base-100 shadow-xl">
+                        <div className="card-body items-center text-center">
+                            <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+                                <Code2Icon className="size-8 text-primary" />
+                            </div>
+                            <h3 className="card-title">Live Code Editor</h3>
+                            <p className="text-base-content/70">
+                                Collaborate in real-time with syntax highlighting and multiple language support
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Feature 3 */}
+                    <div className="card bg-base-100 shadow-xl">
+                        <div className="card-body items-center text-center">
+                            <div className="size-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-4">
+                                <UsersIcon className="size-8 text-primary" />
+                            </div>
+                            <h3 className="card-title">Easy Collaboration</h3>
+                            <p className="text-base-content/70">
+                                Share your screen, discuss solutions, and learn from each other in real-time
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+export default HomePage;
+</file>
+
+<file path="backend/src/models/User.js">
+import mongoose from "mongoose";
+
+const userSchema = new mongoose.Schema(
+    {
+        name: {
+            type: String,
+            required: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+        profileImage: {
+            type: String,
+            default: "",
+        },
+        clerkID: {
+            type: String,
+            required: true,
+            unique: true,
+        },
+    },
+    { timestamps: true } // createdAt, updatedAt
+);
+
+const User = mongoose.model("User", userSchema);
+
+export default User;
+</file>
+
+<file path="backend/src/lib/env.js">
+import dotenv from "dotenv"
+dotenv.config({ quiet: true });
+export const ENV = {
+    PORT: process.env.PORT,
+    DB_URL: process.env.DB_URL,
+    NODE_ENV: process.env.NODE_ENV,
+    CLIENT_URL: process.env.CLIENT_URL,
+    INNGEST_EVENT_KEY: process.env.INNGEST_EVENT_KEY,
+    INNGEST_SIGNING_KEY: process.env.NODE_ENV === "production" ? process.env.INNGEST_SIGNING_KEY : undefined, STREAM_API_KEY: process.env.STREAM_API_KEY,
+    STREAM_API_SECRET: process.env.STREAM_API_SECRET,
+
+};
+</file>
+
+<file path="backend/package.json">
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@clerk/express": "^1.7.41",
+    "@stream-io/node-sdk": "^0.7.12",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "inngest": "^4.12.1",
+    "mongoose": "^8.19.1",
+    "stream-chat": "^9.24.0",
+    "talent-iq": "file:.."
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
+</file>
+
+<file path="backend/src/lib/db.js">
+import mongoose from "mongoose";
+
+import { ENV } from "./env.js";
+
+export const connectDB = async () => {
+    try {
+        if (!ENV.DB_URL) {
+            throw new Error("DB_URL is not defined in environment variables");
+        }
+        const conn = await mongoose.connect(ENV.DB_URL);
+        console.log("✅ Connected to MongoDB:", conn.connection.host);
+    } catch (error) {
+        console.error("❌ Error connecting to MongoDB", error);
+        process.exit(1); // 0 means success, 1 means failure
+    }
+};
+</file>
+
+<file path="frontend/package.json">
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@clerk/clerk-react": "^5.60.0",
+    "@tailwindcss/vite": "^4.1.14",
+    "@tanstack/react-query": "^5.90.5",
+    "@vitejs/plugin-react": "^5.0.3",
+    "axios": "^1.12.2",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^0.563.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-hot-toast": "^2.6.0",
+    "react-router": "^7.9.4",
+    "tailwindcss": "^4.1.14",
+    "talent-iq": "file:..",
+    "vite": "^7.1.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "daisyui": "^5.3.10",
+    "eslint": "^9.36.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.4.0"
+  }
+}
+</file>
+
+<file path="frontend/src/App.jsx">
+import { SignedIn, SignedOut, SignIn, SignInButton, SignOutButton, UserButton, useUser } from "@clerk/clerk-react"
+import { Navigate, Route, Routes } from "react-router"
+import HomePage from "./pages/HomePage"
+import ProblemsPage from "./pages/ProblemsPage"
+import { Toaster } from "react-hot-toast"
+import DashboardPage from "./pages/DashboardPage"
+
+
+function App() {
+  const { isSignedIn, isLoaded } = useUser();
+
+  //this will get rid of the flickering effect
+  if (!isLoaded) return null;
+
+  return (
+    <>
+      <Routes>
+        <Route path="/" element={!isSignedIn ? < HomePage /> : <Navigate to={"/dashboard"} />} />
+        <Route path="/dashboard" element={isSignedIn ? < DashboardPage /> : <Navigate to={"/"} />} />
+        <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to={"/"} />} />
+      </Routes >
+
+      <Toaster toastOptions={{ duration: 3000 }} />
+
+    </>
+
+  )
+}
+
+export default App
+
+//tw, daisyui, react-router, react-hot-toast,
+// todo: react-query aka tanstack query, axios
+</file>
+
+<file path="backend/src/lib/inngest.js">
+import { Inngest } from "inngest";
+import { connectDB } from "./db.js";
+import User from "../models/User.js";
+import { deleteStreamUser, upsertStreamUser } from "./stream.js";
+
+export const inngest = new Inngest({
+    id: "talent-iq"
+});
+
+// const syncUser = inngest.createFunction(
+//     {
+//         id: "sync-user",
+//         triggers: [{ event: "clerk/user.created" }],
+//     },
+//     async ({ event }) => {
+
+//         console.log("========== syncUser triggered ==========");
+//         console.log(event.data);
+
+
+//         await connectDB();
+
+//         const { id, email_addresses, first_name, last_name, image_url } = event.data;
+
+//         const newUser = {
+//             clerkID: id,
+//             email: email_addresses[0]?.email_address,
+//             name: `${first_name || ""} ${last_name || ""}`,
+//             profileImage: image_url,
+//         };
+
+
+//         console.log("Creating user:", newUser);
+
+
+//         await User.create(newUser);
+
+//         console.log("User created successfully");
+
+//         await upsertStreamUser({
+//             id: newUser.clerkID.toString(),
+//             name: newUser.name,
+//             image: newUser.profileImage
+//         })
+
+//         //challenge: send a welcome email here later - once I complete the course
+//     }
+// );
+
+const syncUser = inngest.createFunction(
+    {
+        id: "sync-user",
+        triggers: [{ event: "clerk/user.created" }],
+    },
+    async () => {
+        console.log("SYNC WORKS");
+
+        return {
+            success: true,
+        };
+    }
+);
+
+const deleteUserFromDB = inngest.createFunction(
+    {
+        id: "delete-user-from-db",
+        triggers: [{ event: "clerk/user.deleted" }],
+    },
+    async ({ event }) => {
+        await connectDB();
+
+        const { id } = event.data;
+        await User.deleteOne({ clerkID: id });
+
+        await deleteStreamUser(id.toString())
+
+    }
+);
+
+export const functions = [syncUser, deleteUserFromDB];
+</file>
+
+<file path="backend/src/server.js">
+import express from "express";
+import path from "path";
+import cors from "cors";
+import { serve } from "inngest/express";
+import { clerkMiddleware } from "@clerk/express";
+
+import { ENV } from "./lib/env.js";
+import { connectDB } from "./lib/db.js";
+import { inngest, functions } from "./lib/inngest.js";
+
+import chatRoutes from "./routes/chatRoutes.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+
+if (process.env.NODE_ENV !== "production") {
+    delete process.env.INNGEST_SIGNING_KEY;
+}
+
+const app = express();
+
+const __dirname = path.resolve();
+
+// credentials:true meaning?? => server allows a browser to include cookies on request
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+
+app.use(
+    "/api/inngest",
+    (req, res, next) => {
+        console.log("INNGEST ROUTE HIT");
+        next();
+    },
+    serve({ client: inngest, functions })
+);
+
+
+// middleware
+app.use(express.json());
+
+
+
+// app.use("/api/inngest", serve({ client: inngest, functions }));
+
+
+// app.use(clerkMiddleware()); // this adds auth field to request object: req.auth()
+
+
+
+app.use(clerkMiddleware());
+
+app.use("/api/chat", chatRoutes);
+app.use("/api/sessions", sessionRoutes);
+
+app.get("/health", (req, res) => {
+    res.status(200).json({ msg: "api is up and running" });
+});
+
+// make our app ready for deployment
+if (ENV.NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+
+    app.get("/{*any}", (req, res) => {
+        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    });
+}
+
+const startServer = async () => {
+    try {
+        await connectDB();
+        app.listen(ENV.PORT, () => console.log("Server is running on port:", ENV.PORT));
+    } catch (error) {
+        console.error("💥 Error starting the server", error);
+    }
+};
+
+startServer();
+</file>
+
+</files>

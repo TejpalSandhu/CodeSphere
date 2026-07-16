@@ -16,7 +16,7 @@
 |---|---|
 | **Live Video & Audio** | Crystal-clear HD video communication powered by Stream SDK |
 | **Collaborative Code Editor** | Real-time code syncing with Monaco Editor (the engine behind VS Code) |
-| **Multi-Language Execution** | Write and execute code in JavaScript, Python, and Java via Judge0 CE API |
+| **Multi-Language Execution** | Write and execute code in JavaScript, Python, Java, and C++ via Judge0 CE API |
 | **Problem Library** | Curated algorithmic challenges (Two Sum, Maximum Subarray, and more) with output validation |
 | **Session Chat** | Built-in messaging for sharing links and notes during an active session |
 | **Resizable Panels** | Fully customizable workspace layout with draggable, resizable panes |
@@ -159,7 +159,7 @@ Navigate to **[http://localhost:5173](http://localhost:5173)** in your browser.
 2. **Dashboard** — View your stats, recent sessions, and browse currently active rooms.
 3. **Problem Library** — Explore curated algorithm challenges. Click **Solve** to start a solo practice session.
 4. **Live Sessions** — Create a new room with a specific problem and difficulty. Share the room link with a partner to start a real-time pair programming session complete with video, chat, and a shared code editor.
-5. **Code Execution** — Select a language (JavaScript, Python, or Java), write your solution, and run it against test cases. The platform handles Java class formatting and displays compilation/runtime errors directly in the output panel.
+5. **Code Execution** — Select a language (JavaScript, Python, Java, or C++), write your solution, and run it against test cases. The platform handles Java class formatting and displays compilation/runtime errors directly in the output panel.
 
 ---
 

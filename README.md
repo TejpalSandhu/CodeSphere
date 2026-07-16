@@ -96,8 +96,8 @@ CodeSphere/
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/TejpalSandhu/talent-IQ.git
-cd talent-IQ
+git clone https://github.com/TejpalSandhu/CodeSphere.git
+cd CodeSphere
 ```
 
 ### 2. Set Up the Backend

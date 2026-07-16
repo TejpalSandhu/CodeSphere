@@ -1,4 +1,4 @@
-<![CDATA[# CodeSphere 🌐
+# CodeSphere 🌐
 
 > A modern, real-time collaborative platform for technical interviews and pair programming — connect face-to-face via video, code together in a shared editor, and solve curated algorithm challenges across multiple languages with instant execution.
 
@@ -192,4 +192,3 @@ Contributions are welcome! Feel free to open an [issue](https://github.com/Tejpa
 ## 📝 License
 
 This project is licensed under the **ISC License**.
-]]>

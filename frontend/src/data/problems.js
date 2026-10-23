@@ -128,11 +128,11 @@ int main() {
 // Test cases
 let test1 = ["h","e","l","l","o"];
 reverseString(test1);
-console.log(test1); // Expected: ["o","l","l","e","h"]
+console.log(test1); // Expected: [ 'o', 'l', 'l', 'e', 'h' ]
 
 let test2 = ["H","a","n","n","a","h"];
 reverseString(test2);
-console.log(test2); // Expected: ["h","a","n","n","a","H"]`,
+console.log(test2); // Expected: [ 'h', 'a', 'n', 'n', 'a', 'H' ]`,
             python: `def reverseString(s):
     # Write your solution here
     pass
@@ -140,11 +140,11 @@ console.log(test2); // Expected: ["h","a","n","n","a","H"]`,
 # Test cases
 test1 = ["h","e","l","l","o"]
 reverseString(test1)
-print(test1)  # Expected: ["o","l","l","e","h"]
+print(test1)  # Expected: ['o', 'l', 'l', 'e', 'h']
 
 test2 = ["H","a","n","n","a","h"]
 reverseString(test2)
-print(test2)  # Expected: ["h","a","n","n","a","H"]`,
+print(test2)  # Expected: ['h', 'a', 'n', 'n', 'a', 'H']`,
             java: `import java.util.*;
 
 class Solution {
@@ -176,7 +176,7 @@ void reverseString(vector<char>& s) {
 void printVector(const vector<char>& v) {
     cout << "[";
     for (int i = 0; i < v.size(); i++) {
-        cout << "\"" << v[i] << "\"";
+        cout << "\\"" << v[i] << "\\"";
         if (i < v.size() - 1) cout << ",";
     }
     cout << "]" << endl;
@@ -194,7 +194,7 @@ int main() {
 }`,
         },
         expectedOutput: {
-            javascript: '["o","l","l","e","h"]\n["h","a","n","n","a","H"]',
+            javascript: "['o', 'l', 'l', 'e', 'h']\n['h', 'a', 'n', 'n', 'a', 'H']",
             python: "['o', 'l', 'l', 'e', 'h']\n['h', 'a', 'n', 'n', 'a', 'H']",
             java: "[o, l, l, e, h]\n[h, a, n, n, a, H]",
             cpp: '["o","l","l","e","h"]\n["h","a","n","n","a","H"]',

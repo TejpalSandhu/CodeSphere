@@ -22,14 +22,26 @@ export const protectRoute = [
                 try {
                     const clerkUser = await clerkClient.users.getUser(clerkID)
 
+                    const email = clerkUser.emailAddresses[0]?.emailAddress
                     const newUser = {
                         clerkID: clerkUser.id,
-                        email: clerkUser.emailAddresses[0]?.emailAddress,
-                        name: `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim(),
+                        email,
+                        // name is required - fall back for users who signed up without first/last name
+                        name:
+                            `${clerkUser.firstName || ""} ${clerkUser.lastName || ""}`.trim() ||
+                            clerkUser.username ||
+                            email?.split("@")[0] ||
+                            "User",
                         profileImage: clerkUser.imageUrl || "",
                     }
 
-                    user = await User.create(newUser)
+                    // upsert instead of create: the dashboard fires several requests at once on first
+                    // login, and a plain create() would fail with a duplicate key error for all but one
+                    user = await User.findOneAndUpdate(
+                        { clerkID },
+                        { $setOnInsert: newUser },
+                        { upsert: true, new: true, runValidators: true }
+                    )
                     console.log("User created in DB from Clerk fallback:", user)
 
                     // Also upsert user in Stream (chat/video)

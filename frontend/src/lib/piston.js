@@ -1,5 +1,3 @@
-import { version } from "react"
-
 // Using Judge0 API instead of Piston API because public Piston API is now whitelist-only
 const JUDGE0_API = "https://ce.judge0.com";
 
@@ -71,6 +69,16 @@ export async function executeCode(language, code) {
             };
         }
 
+        // status id 3 = "Accepted"; anything else (time limit exceeded, runtime error
+        // without stderr, internal error...) is a failure even when stderr is empty
+        if (data.status && data.status.id !== 3) {
+            return {
+                success: false,
+                output: output,
+                error: data.message || data.status.description || "Execution failed"
+            };
+        }
+
         return {
             success: true,
             output: output || "No output"
@@ -82,15 +90,4 @@ export async function executeCode(language, code) {
             error: `Failed to execute code: ${error.message}`,
         };
     }
-}
-
-function getFileExtension(language) {
-    const extensions = {
-        javascript: "js",
-        python: "py",
-        java: "java",
-        cpp: "cpp",
-    };
-
-    return extensions[language] || "txt";
 }

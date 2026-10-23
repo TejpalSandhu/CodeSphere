@@ -16,7 +16,7 @@ function ProblemPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [currentProblemId, setCurrentProblemId] = useState("two-sum");
+    const [currentProblemId, setCurrentProblemId] = useState(id && PROBLEMS[id] ? id : "two-sum");
     const [selectedLanguage, setSelectedLanguage] = useState("javascript");
     const [code, setCode] = useState(PROBLEMS[currentProblemId].starterCode.javascript);
     const [output, setOutput] = useState(null);
@@ -113,7 +113,7 @@ function ProblemPage() {
             <div className="flex-1">
                 <PanelGroup orientation="horizontal">
                     {/* left panel- problem desc */}
-                    <Panel defaultSize={40} minSize={30}>
+                    <Panel defaultSize="40%" minSize="30%">
                         <ProblemDescription
                             problem={currentProblem}
                             currentProblemId={currentProblemId}
@@ -125,10 +125,10 @@ function ProblemPage() {
                     <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
 
                     {/* right panel- code editor & output */}
-                    <Panel defaultSize={60} minSize={30}>
+                    <Panel defaultSize="60%" minSize="30%">
                         <PanelGroup orientation="vertical">
                             {/* Top panel - Code editor */}
-                            <Panel defaultSize={70} minSize={30}>
+                            <Panel defaultSize="70%" minSize="30%">
                                 <CodeEditorPanel
                                     selectedLanguage={selectedLanguage}
                                     code={code}
@@ -143,7 +143,7 @@ function ProblemPage() {
 
                             {/* Bottom panel - Output Panel*/}
 
-                            <Panel defaultSize={30} minSize={30}>
+                            <Panel defaultSize="30%" minSize="15%">
                                 <OutputPanel output={output} />
                             </Panel>
                         </PanelGroup>

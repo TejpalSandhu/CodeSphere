@@ -1,4 +1,3 @@
-import { MessageSearchSource } from "stream-chat"
 import { chatClient, streamClient } from "../lib/stream.js"
 import Session from "../models/Session.js"
 
@@ -18,23 +17,30 @@ export async function createSession(req, res) {
         //create the session in the database
         const session = await Session.create({ problem, difficulty, host: userId, callId })
 
-        //create stream video call
-        await streamClient.video.call("default", callId).getOrCreate({
-            data: {
+        try {
+            //create stream video call
+            await streamClient.video.call("default", callId).getOrCreate({
+                data: {
+                    created_by_id: clerkID,
+                    custom: { problem, difficulty, sessionId: session._id.toString() },
+                },
+            })
+
+            //chat messaging
+
+            const channel = chatClient.channel("messaging", callId, {
+                name: `${problem} Session`,
                 created_by_id: clerkID,
-                custom: { problem, difficulty, sessionId: session._id.toString() },
-            },
-        })
+                members: [clerkID],
+            });
 
-        //chat messaging
+            await channel.create();
+        } catch (streamError) {
+            //don't leave a broken "active" session behind if stream setup failed
+            await Session.findByIdAndDelete(session._id)
+            throw streamError
+        }
 
-        const channel = chatClient.channel("messaging", callId, {
-            name: `${problem} Session`,
-            created_by_id: clerkID,
-            members: [clerkID],
-        });
-
-        await channel.create();
         res.status(201).json({ session })
     } catch (error) {
         console.log("Error in createSession controller:", error.message)
@@ -101,20 +107,28 @@ export async function joinSession(req, res) {
         const userId = req.user._id
         const clerkID = req.user.clerkID
 
-        const session = await Session.findById(id)
+        const existingSession = await Session.findById(id)
 
-        if (!session) return res.status(404).json({ message: "Session not found" })
+        if (!existingSession) return res.status(404).json({ message: "Session not found" })
 
-        if (session.status !== "active") return res.status(400).json({ message: "Cannot join a completed session" })
+        if (existingSession.status !== "active") return res.status(400).json({ message: "Cannot join a completed session" })
 
-        if (session.host.toString() === userId.toString())
+        if (existingSession.host.toString() === userId.toString())
             return res.status(400).json({ message: "Host cannot join their own session as participant" })
 
-        //check if session is already full - has a participant
-        if (session.participant) return res.status(409).json({ message: "Session is full" })
+        //already the participant (e.g. duplicate request) - nothing to do
+        if (existingSession.participant?.toString() === userId.toString())
+            return res.status(200).json({ session: existingSession })
 
-        session.participant = userId
-        await session.save()
+        //atomically claim the participant slot so two users can't join at the same time
+        const session = await Session.findOneAndUpdate(
+            { _id: id, status: "active", participant: null },
+            { participant: userId },
+            { new: true }
+        )
+
+        //check if session is already full - has a participant
+        if (!session) return res.status(409).json({ message: "Session is full" })
 
         const channel = chatClient.channel("messaging", session.callId)
         await channel.addMembers([clerkID])
@@ -138,7 +152,7 @@ export async function endSession(req, res) {
 
         //check if user is the host
         if (session.host.toString() !== userId.toString()) {
-            res.status(403).json({ message: "Only the host can end the Session" })
+            return res.status(403).json({ message: "Only the host can end the Session" })
         }
 
         //check if session is already completed
@@ -146,13 +160,21 @@ export async function endSession(req, res) {
             return res.status(400).json({ message: "Session is already completed" })
         }
 
-        // delete stream video call
-        const call = streamClient.video.call("default", session.callId)
-        await call.delete({ hard: true })
+        // delete stream video call & chat channel - a failure here (e.g. already deleted)
+        // should not prevent the session from being marked as completed
+        try {
+            const call = streamClient.video.call("default", session.callId)
+            await call.delete({ hard: true })
+        } catch (error) {
+            console.log("Error deleting stream call:", error.message)
+        }
 
-        // delete stream chat channel
-        const channel = chatClient.channel("messaging", session.callId)
-        await channel.delete()
+        try {
+            const channel = chatClient.channel("messaging", session.callId)
+            await channel.delete()
+        } catch (error) {
+            console.log("Error deleting stream channel:", error.message)
+        }
 
         session.status = "completed"
         await session.save()

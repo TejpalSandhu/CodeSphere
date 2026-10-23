@@ -28,7 +28,6 @@
     "stream-chat": "^9.50.1",
     "stream-chat-react": "^14.8.0",
     "tailwindcss": "^4.1.14",
-    "talent-iq": "file:..",
     "vite": "^7.1.7"
   },
   "devDependencies": {

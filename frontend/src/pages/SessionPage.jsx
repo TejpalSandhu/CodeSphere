@@ -54,6 +54,7 @@ function SessionPage() {
         joinSessionMutation.mutate(id, { onSuccess: refetch });
 
         // remove the joinSessionMutation, refetch from dependencies to avoid infinite loop
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [session, user, loadingSession, isHost, isParticipant, id]);
 
     // redirect the "participant" when session ends
@@ -102,7 +103,7 @@ function SessionPage() {
             <div className="flex-1">
                 <PanelGroup orientation="horizontal">
                     {/* LEFT PANEL - PROBLEM DETAILS */}
-                    <Panel defaultSize={35} minSize={20}>
+                    <Panel defaultSize="35%" minSize="20%">
                         <div className="h-full overflow-y-auto bg-base-200">
                                     {/* HEADER SECTION */}
                                     <div className="p-6 bg-base-100 border-b border-base-300">
@@ -227,9 +228,9 @@ function SessionPage() {
                     <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
 
                     {/* MIDDLE PANEL - CODE EDITOR & OUTPUT */}
-                    <Panel defaultSize={40} minSize={30}>
+                    <Panel defaultSize="40%" minSize="30%">
                         <PanelGroup orientation="vertical">
-                            <Panel defaultSize={70} minSize={30}>
+                            <Panel defaultSize="70%" minSize="30%">
                                 <CodeEditorPanel
                                     selectedLanguage={selectedLanguage}
                                     code={code}
@@ -242,7 +243,7 @@ function SessionPage() {
 
                             <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
-                            <Panel defaultSize={30} minSize={15}>
+                            <Panel defaultSize="30%" minSize="15%">
                                 <OutputPanel output={output} />
                             </Panel>
                         </PanelGroup>
@@ -251,7 +252,7 @@ function SessionPage() {
                     <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
 
                     {/* RIGHT PANEL - VIDEO CALLS & CHAT */}
-                    <Panel defaultSize={25} minSize={20}>
+                    <Panel defaultSize="25%" minSize="20%">
                         <div className="h-full bg-base-200 p-4 overflow-auto">
                             {isInitializingCall ? (
                                 <div className="h-full flex items-center justify-center">

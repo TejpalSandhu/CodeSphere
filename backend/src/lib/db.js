@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import { ENV } from "./env.js";
 
 export const connectDB = async () => {
+    // already connected (connectDB is also called from every Inngest function run)
+    if (mongoose.connection.readyState === 1) return;
+
     try {
         if (!ENV.DB_URL) {
             throw new Error("DB_URL is not defined in environment variables");

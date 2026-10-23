@@ -20,16 +20,24 @@ const syncUser = inngest.createFunction(
 
         const { id, email_addresses, first_name, last_name, image_url } = event.data;
 
+        const email = email_addresses?.[0]?.email_address;
         const newUser = {
             clerkID: id,
-            email: email_addresses[0]?.email_address,
-            name: `${first_name || ""} ${last_name || ""}`,
-            profileImage: image_url,
+            email,
+            // name is required - fall back for users who signed up without first/last name
+            name: `${first_name || ""} ${last_name || ""}`.trim() || event.data.username || email?.split("@")[0] || "User",
+            profileImage: image_url || "",
         };
 
         console.log("Creating user:", newUser);
 
-        await User.create(newUser);
+        // upsert: the user may already have been created by the protectRoute fallback,
+        // and Inngest retries the function if it throws (e.g. on a duplicate key error)
+        await User.findOneAndUpdate(
+            { clerkID: id },
+            { $setOnInsert: newUser },
+            { upsert: true, new: true, runValidators: true }
+        );
 
         console.log("User created successfully");
 

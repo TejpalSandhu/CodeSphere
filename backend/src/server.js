@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "fs";
 import path from "path";
 import cors from "cors";
 import { serve } from "inngest/express";
@@ -41,12 +42,16 @@ app.get("/health", (req, res) => {
 });
 
 // make our app ready for deployment
-if (ENV.NODE_ENV === "production") {
-    app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// only serve the frontend if it was built next to the backend - when the frontend is
+// deployed separately (e.g. on Vercel) frontend/dist doesn't exist on the API server
+const frontendDist = path.join(__dirname, "../frontend/dist");
+
+if (ENV.NODE_ENV === "production" && fs.existsSync(path.join(frontendDist, "index.html"))) {
+    app.use(express.static(frontendDist));
 
     // "*" is the Express 4 catch-all syntax ("/{*any}" only works in Express 5)
     app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+        res.sendFile(path.join(frontendDist, "index.html"));
     });
 }
 

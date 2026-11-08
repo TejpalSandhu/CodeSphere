@@ -1,10 +1,11 @@
-import { clerkClient, requireAuth } from '@clerk/express'
+import { clerkClient } from '@clerk/express'
 import User from "../models/User.js"
 import { upsertStreamUser } from "../lib/stream.js"
 
+// requireAuth() is not used here: it redirects unauthenticated requests (302) instead of
+// returning 401, which is wrong for an API. clerkMiddleware() in server.js already sets
+// req.auth(), so the userId check below is enough.
 export const protectRoute = [
-    requireAuth(), // requireAuth({signInUrl: "/sign-in"}) dont let requireAuth() to take us to home page
-
     async (req, res, next) => {
         try {
             const clerkID = req.auth().userId;

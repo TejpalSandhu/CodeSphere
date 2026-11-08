@@ -4,7 +4,7 @@ import {
     SpeakerLayout,
     useCallStateHooks,
 } from "@stream-io/video-react-sdk";
-import { Loader2Icon, MessageSquareIcon, UsersIcon, XIcon } from "lucide-react";
+import { Loader2Icon, MessageSquareIcon, PhoneOffIcon, UsersIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Channel, Chat, MessageComposer, MessageList, Thread, Window } from "stream-chat-react";
@@ -18,6 +18,19 @@ function VideoCallUI({ chatClient, channel }) {
     const callingState = useCallCallingState();
     const participantCount = useParticipantCount();
     const [isChatOpen, setIsChatOpen] = useState(false);
+
+    // when the host ends the session the backend deletes the call & chat channel, and the SDK
+    // leaves the call automatically - don't keep rendering video/chat components for a dead call
+    if (callingState === CallingState.LEFT) {
+        return (
+            <div className="h-full flex items-center justify-center">
+                <div className="text-center">
+                    <PhoneOffIcon className="w-12 h-12 mx-auto text-base-content/50 mb-4" />
+                    <p className="text-lg">Call ended</p>
+                </div>
+            </div>
+        );
+    }
 
     if (callingState === CallingState.JOINING) {
         return (

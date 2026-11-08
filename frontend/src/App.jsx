@@ -1,7 +1,8 @@
 import { lazy, Suspense } from "react"
 import { useUser } from "@clerk/clerk-react"
 import { Toaster } from "react-hot-toast"
-import { Navigate, Route, Routes } from "react-router"
+import { Navigate, Route, Routes, useLocation } from "react-router"
+import ErrorBoundary from "./components/ErrorBoundary"
 import DashboardPage from "./pages/DashboardPage"
 import HomePage from "./pages/HomePage"
 import ProblemsPage from "./pages/ProblemsPage"
@@ -12,12 +13,15 @@ const SessionPage = lazy(() => import("./pages/SessionPage"))
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
+  const location = useLocation();
 
   //this will get rid of the flickering effect
   if (!isLoaded) return null;
 
   return (
     <>
+      {/* key: reset the boundary when the route changes, so an error on one page doesn't stick */}
+      <ErrorBoundary key={location.pathname}>
       <Routes>
         <Route path="/" element={!isSignedIn ? < HomePage /> : <Navigate to={"/dashboard"} />} />
         <Route path="/dashboard" element={isSignedIn ? < DashboardPage /> : <Navigate to={"/"} />} />
@@ -31,6 +35,7 @@ function App() {
           ) : <Navigate to={"/"} />
         } />
       </Routes >
+      </ErrorBoundary>
 
       <Toaster toastOptions={{ duration: 3000 }} />
 
